@@ -1,4 +1,4 @@
-#include "../include/String.h"
+#include "String.h"
 
 unsigned String::length() const{
     return cStrLen(buffer);

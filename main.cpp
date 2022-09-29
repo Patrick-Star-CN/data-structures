@@ -1,6 +1,6 @@
 #include <iostream>
-#include "include/Test.h"
-#include "include/LinkList.h"
+#include "Test.h"
+#include "LinkList/LinkList.h"
 
 
 int main() {
