@@ -1,19 +1,34 @@
 #ifndef DATA_STRUCTURES_ARRAYLIST_H
 #define DATA_STRUCTURES_ARRAYLIST_H
 
-#include "ListNode.h"
 #include <iostream>
-
 template <typename T>
 class LinkList {
+private:
+    class ListNode {
+    public:
+        explicit ListNode(T data) {
+            this->data = data;
+            next = nullptr;
+        }
+
+        T data;
+        ListNode *next;
+    };
+
+    ListNode *head;
+    int length;
+
 public:
     LinkList();
 
     LinkList(T);
 
+    LinkList(const LinkList<T> &);
+
     virtual ~LinkList();
 
-    ListNode<T> *getHead() const;
+    LinkList<T>::ListNode *getHead() const;
 
     int getLength() const;
 
@@ -25,117 +40,133 @@ public:
 
     bool empty();
 
-private:
-    ListNode<T> *head;
+    bool operator==(const LinkList &) const;
 
-    int length;
+    bool operator!=(const LinkList &) const;
 
-    void setLength(int length);
-
-    void setHead(ListNode<T>*);
 };
-
 
 #endif //DATA_STRUCTURES_ARRAYLIST_H
 
-template <typename T>
-LinkList<T>::LinkList(T data) {
-    this->length = 1;
-    auto head = new ListNode<T>(data);
-    this->head = head;
-}
-
-template <typename T>
+template<typename T>
 LinkList<T>::LinkList() {
-    this->length = 0;
-    this->head = nullptr;
+    head = nullptr;
+    length = 0;
 }
 
-template <typename T>
+template<typename T>
+LinkList<T>::LinkList(T data) {
+    auto node = new ListNode(data);
+    head = node;
+    length = 1;
+}
+
+template<typename T>
 LinkList<T>::~LinkList() {
+    if (head == nullptr) {
+        return;
+    }
     auto ptr = head;
-    auto ptr_ = ptr;
-    if (ptr != nullptr) {
-        ptr_ = ptr->getNext();
+    auto ptr_ = this->head;
+    while (ptr != nullptr) {
+        ptr_ = ptr->next;
         delete ptr;
         ptr = ptr_;
     }
     head = nullptr;
+    length = 0;
 }
 
-template <typename T>
-ListNode<T> *LinkList<T>::getHead() const {
+template<typename T>
+typename LinkList<T>::ListNode *LinkList<T>::getHead() const {
     return head;
 }
 
-template <typename T>
+template<typename T>
 int LinkList<T>::getLength() const {
     return length;
 }
 
-template <typename T>
-void LinkList<T>::setLength(int length) {
-    this->length = length;
-}
-
-template <typename T>
-void LinkList<T>::insert(T data) {
-    auto node = new ListNode<T>(data);
-    if (this->getHead() == nullptr) {
-        this->setLength(1);
-        this->setHead(node);
-    } else {
-        auto ptr = this->getHead();
-        auto ptr_ = ptr;
-        while (ptr != nullptr) {
-            ptr_ = ptr;
-            ptr = ptr->getNext();
-        }
-        ptr_->setNext(node);
-        length++;
-    }
-}
-
 template<typename T>
-void LinkList<T>::setHead(ListNode<T> *head) {
-    this->head = head;
+void LinkList<T>::insert(T data) {
+    auto node = new ListNode(data);
+    auto ptr = head;
+    while (ptr->next != nullptr) {
+        ptr = ptr->next;
+    }
+    ptr->next = node;
+    length ++;
 }
 
 template<typename T>
 void LinkList<T>::display(std::ostream &out) {
-    auto ptr = this->getHead();
+    auto ptr = head;
     while (ptr != nullptr) {
-        out << ptr->getData() << std::endl;
-        ptr = ptr->getNext();
+        out << ptr->data << std::endl;
+        ptr = ptr->next;
     }
 }
 
 template<typename T>
 void LinkList<T>::erase(T data) {
-    auto ptr = this->getHead();
-    if (ptr == nullptr) {
-        return;
-    }
-    if (data == ptr->getData()) {
-        this->setHead(ptr->getNext());
+    auto ptr = head;
+    if (ptr->data == data) {
+        head = ptr->next;
+        length --;
         delete ptr;
+        ptr = nullptr;
         return;
     }
-
     auto ptr_ = ptr;
-    ptr = ptr->getNext();
+    ptr = ptr->next;
     while (ptr != nullptr) {
-        if (ptr->getData() == data) {
-            ptr_->setNext(ptr->getNext());
+        if (ptr->data == data) {
+            ptr_->next = ptr->next;
             delete ptr;
+            ptr = nullptr;
+            length --;
             return;
         }
         ptr_ = ptr;
-        ptr = ptr->getNext();
+        ptr = ptr->next;
     }
 }
 
 template<typename T>
 bool LinkList<T>::empty() {
-    return this->getHead() == nullptr;
+    return head == nullptr;
+}
+
+template<typename T>
+LinkList<T>::LinkList(const LinkList<T> &right) {
+    length = right.length;
+    auto node = new ListNode(right.head->data);
+    head = node;
+    auto ptr = right.head->next;
+    auto _ptr = head;
+    while (ptr != nullptr) {
+        auto node = new ListNode(ptr->data);
+        _ptr->next = node;
+        _ptr = _ptr->next;
+        ptr = ptr->next;
+    }
+}
+
+template<typename T>
+bool LinkList<T>::operator==(const LinkList &right) const {
+    if (length != right.length) {
+        return false;
+    }
+    auto ptr = head;
+    auto ptr_ = right.head;
+    while (ptr != nullptr && ptr_ != nullptr && ptr->data == ptr_->data) {
+        ptr = ptr->next;
+        ptr_ = ptr_->next;
+    }
+    return ptr == nullptr && ptr_ == nullptr;
+}
+
+template<typename T>
+bool LinkList<T>::operator!=(const LinkList &right) const {
+    return right != *this;
 }

@@ -78,7 +78,7 @@ String &String::operator=(const char *right) {
         assert(buffer != nullptr);
     }
     unsigned i = 0;
-    for (; cStrLen(right) != '\0'; i ++) {
+    for (; right[i] != '\0'; i ++) {
         buffer[i] = right[i];
     }
     buffer[i] = '\0';
@@ -127,14 +127,20 @@ std::istream &operator>>(std::istream &in, String &str) {
     return in;
 }
 
-std::ostream &operator<<(std::ostream &out, String &str) {
+std::ostream &operator<<(std::ostream &out, const String &str) {
     out << str.getBuffer();
     return out;
 }
 
-int String::KMPMatch(const String &pattern) {
+String operator+(const String &left, const String &right) {
+    String newString(left);
+    newString += right;
+    return newString;
+}
+
+int String::KMPMatch(const String &pattern, unsigned num = 0) const {
     int *prefix = getPrefix(pattern.buffer, pattern.length());
-    int tar = 0, pos = 0;
+    int tar = 0, pos = 0, num_ = 0;
     while (tar < length()) {
         if (buffer[tar] == pattern.buffer[pos]) {
             tar ++;
@@ -146,13 +152,16 @@ int String::KMPMatch(const String &pattern) {
         }
 
         if (pos == pattern.length()) {
-            return tar - pos;
+            if (num == num_) {
+                return tar - pos;
+            }
+            num_ ++;
         }
     }
-    return 0;
+    return -1;
 }
 
-int *String::getPrefix(char *buffer_, int length) {
+int *String::getPrefix(char *buffer_, int length) const {
     int *prefix = new int[length];
     prefix[0] = 0;
     int i = 1, now = 0;
@@ -193,4 +202,41 @@ bool String::operator==(const String &right) {
 
 bool String::operator!=(const String &right) {
     return compare(right) != 0;
+}
+
+void String::operator+=(const String &right) {
+    int len = bufLen + right.bufLen - 1;
+    char *newBuffer = new char[len];
+    assert(newBuffer != nullptr);
+    int i = 0;
+    for (; i < bufLen - 1; i ++) {
+        newBuffer[i] = buffer[i];
+    }
+    for (int j = 0; i < len - 1; i ++, j ++) {
+        newBuffer[i] = right.buffer[j];
+    }
+    newBuffer[i] = '\0';
+    bufLen = len;
+    delete []buffer;
+    buffer = newBuffer;
+}
+
+String String::subString(unsigned pos, unsigned len) const {
+    String newStr(len + 1);
+    for (int i = pos, j = 0; i < pos + len; i ++, j ++) {
+        newStr.buffer[j] = buffer[i];
+    }
+    return newStr;
+}
+
+String replace_all(const String str, const String subString, const String newSubstring) {
+    String newStr;
+    int i = str.KMPMatch(subString, 0), j = 0, k = 0;
+    for (; i != -1; k ++, i = str.KMPMatch(subString, k)) {
+        newStr += str.subString(j, i - j);
+        newStr += newSubstring;
+
+        j = i + cStrLen(subString.getBuffer());
+    }
+    return newStr;
 }
