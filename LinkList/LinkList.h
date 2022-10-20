@@ -90,12 +90,16 @@ int LinkList<T>::getLength() const {
 template<typename T>
 void LinkList<T>::insert(T data) {
     auto node = new ListNode(data);
+    length ++;
+    if (empty()) {
+        head = node;
+        return;
+    }
     auto ptr = head;
     while (ptr->next != nullptr) {
         ptr = ptr->next;
     }
     ptr->next = node;
-    length ++;
 }
 
 template<typename T>
