@@ -229,7 +229,7 @@ String String::subString(unsigned pos, unsigned len) const {
     return newStr;
 }
 
-String replace_all(const String str, const String subString, const String newSubstring) {
+String replace_all(const String &str, const String &subString, const String &newSubstring) {
     String newStr;
     int i = str.KMPMatch(subString, 0), j = 0, k = 0;
     for (; i != -1; k ++, i = str.KMPMatch(subString, k)) {

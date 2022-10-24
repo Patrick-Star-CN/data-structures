@@ -1,49 +1,94 @@
 #include <iostream>
-#include <vector>
+#include <ctype.h>
+#include "Stack/Stack.h"
 using namespace std;
-vector<int> number, v(10, 20);
-int num, i;
-//仔细阅读下列代码 并按要求给出display输出的内容，其中display的定义如下：
-void display(vector<int>& vec) {
-    for (vector<int>::iterator it = vec.begin(); it != vec.end(); it++)
-        cout << *it << " ";
-    cout << endl;
-}
-bool IsMin2Max(const vector<int>& vec) {
-    vector<int>::const_iterator it = vec.begin();
-    vector<int>::const_iterator it_ = vec.begin();
-    for (it ++; it != vec.end(); it ++, it_ ++) {
-        if (*it < *it_) {
-            return false;
+
+template<typename T>
+T __cal(T left, T right, char c) {
+    switch (c) {
+        case '+': {
+            return left + right;
+        }
+        case '-': {
+            return left - right;
+        }
+        case '*': {
+            return left * right;
+        }
+        case '/': {
+            return left / right;
         }
     }
-    return true;
+    if (typeid(T) == typeid(int) && c == '%') {
+        return (int)left % (int)right;
+    }
 }
 
-template<class T>
-T FW(const vector<T>& vec) {
-    auto it = vec.begin();
-    T Max = *it, Min = *it;
-    for (it ++; it != vec.end(); it ++) {
-        if (*it < Min) {
-            Min = *it;
-        }
-        if (*it > Max) {
-            Max = *it;
-        }
-    }
-    return Max - Min;
+template<typename T1, typename T2>
+void _cal(Stack<T1> &number, Stack<T2> &operatorChar) {
+    T1 sum;
+    sum = number.top();
+    number.pop();
+    sum = __cal<T1>(number.top(), sum, operatorChar.top());
+    number.pop();
+    number.push(sum);
+    //cout << sum << endl;
+    operatorChar.pop();
 }
 
-int main(){
-
-// (1)依次输入99 33 44 88 22 11 55 66 77  -1 ，执行后的display输出为？
-    while (1) {
-        cin >> num;
-        if (num < 0) break;
-        number.push_back(num);
+template<typename T>
+void cal(Stack<T> &number) {
+    Stack<char> operatorChar;
+    char c;
+    T num;
+    while ((c = cin.peek()) != '\n') {
+        if (c == ' ') {
+            c = getchar();
+        } else if (isdigit(c)) {
+            cin >> num;
+            number.push(num);
+        } else {
+            cin >> c;
+            if (c == '(') {
+                operatorChar.push(c);
+            } else if (c == ')') {
+                while (operatorChar.top() != '(') {
+                    _cal<T, char>(number, operatorChar);
+                }
+                operatorChar.pop();
+            } else if (!operatorChar.empty() && (operatorChar.top() == '*' || operatorChar.top() == '/' || operatorChar.top() == '%')) {
+                _cal<T, char>(number, operatorChar);
+                operatorChar.push(c);
+            } else {
+                operatorChar.push(c);
+            }
+        }
     }
-    display(number);
-    cout << FW<int>(number);
+    while (!operatorChar.empty()) {
+        _cal<T, char>(number, operatorChar);
+    }
+    cout << number.top();
+}
+
+int  main() {
+    int typeNum;
+    cout << "请输入想要计算的表达式类型：" << endl
+         << "1: 整数型;" << endl
+         << "2: 浮点型;" << endl
+         << "3: 变量型;" << endl;
+    cin >> typeNum;
+    char ch = getchar();
+    switch (typeNum) {
+        case 1: {
+            Stack<int> number;
+            cal<int>(number);
+            break;
+        }
+        case 2: {
+            Stack<double> number;
+            cal<double>(number);
+            break;
+        }
+    }
     return 0;
 }

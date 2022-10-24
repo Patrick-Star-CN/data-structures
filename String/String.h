@@ -33,7 +33,7 @@ public:
     std::istream &getLine(std::istream &);
 
 private:
-    int len;
+    unsigned len;
     unsigned bufLen;
     char *buffer;
 
@@ -45,6 +45,6 @@ std::istream &operator>>(std::istream &, String &);
 std::ostream &operator<<(std::ostream &, const String &);
 String  operator+(const String& left, const String& right);
 
-String replace_all(const String, const String, const String);
+String replace_all(const String &, const String &, const String &);
 
 #endif //DATA_STRUCTURES_STRING_H
