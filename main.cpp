@@ -40,22 +40,37 @@ template<typename T>
 void cal(Stack<T> &number) {
     Stack<char> operatorChar;
     char c;
+    bool flag = false;
     T num;
     while ((c = cin.peek()) != '\n') {
         if (c == ' ') {
             c = getchar();
+            continue;
         } else if (isdigit(c)) {
             cin >> num;
+            if (flag) {
+                num = -num;
+                flag = false;
+            }
             number.push(num);
         } else {
             cin >> c;
             if (c == '(') {
                 operatorChar.push(c);
+                if (cin.peek() == ' ') {
+                    c = getchar();
+                }
+                if (cin.peek() == '-') {
+                    flag = true;
+                    c = getchar();
+                }
             } else if (c == ')') {
                 while (operatorChar.top() != '(') {
                     _cal<T, char>(number, operatorChar);
                 }
                 operatorChar.pop();
+            } else if (c == '-' && number.empty()) {
+                flag = true;
             } else if (!operatorChar.empty() && (operatorChar.top() == '*' || operatorChar.top() == '/' || operatorChar.top() == '%')) {
                 _cal<T, char>(number, operatorChar);
                 operatorChar.push(c);
@@ -70,6 +85,8 @@ void cal(Stack<T> &number) {
     cout << number.top();
 }
 
+
+
 int  main() {
     int typeNum;
     cout << "请输入想要计算的表达式类型：" << endl
@@ -81,13 +98,24 @@ int  main() {
     switch (typeNum) {
         case 1: {
             Stack<int> number;
-            cal<int>(number);
+            try {
+                cal<int>(number);
+            } catch (const char *error) {
+                cout << "输入的表达式有误" << endl;
+            }
             break;
         }
         case 2: {
             Stack<double> number;
-            cal<double>(number);
+            try {
+                cal<double>(number);
+            } catch (const char *error) {
+                cout << "输入的表达式有误" << endl;
+            }
             break;
+        }
+        case 3: {
+
         }
     }
     return 0;

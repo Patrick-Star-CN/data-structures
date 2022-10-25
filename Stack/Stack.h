@@ -63,7 +63,7 @@ void Stack<T>::operator=(const Stack<T> &right) {
 template<typename T>
 void Stack<T>::pop() {
     if (!size) {
-        return;
+        throw "EMPTY_ERROR";
     }
     size --;
 }
