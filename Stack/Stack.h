@@ -11,7 +11,7 @@ public:
 
     Stack(const Stack<T> &);
 
-    void operator=(const Stack<T> &);
+    Stack &operator=(const Stack<T> &);
 
     void pop();
 
@@ -33,11 +33,13 @@ private:
 template<typename T>
 Stack<T>::Stack():data(nullptr), size(0), capacity(10) {
     data = new T [capacity];
+    assert(data != nullptr);
 }
 
 template<typename T>
 Stack<T>::Stack(unsigned int capacity):capacity(capacity), size(0) {
     data = new T [capacity];
+    assert(data != nullptr);
 }
 
 template<typename T>
@@ -45,19 +47,23 @@ Stack<T>::Stack(const Stack<T> &right) {
     capacity = right.capacity;
     size = right.size;
     data = new T [capacity];
+    assert(data != nullptr);
     for (int i = 0; i < size; i ++) {
         data[i] = right.data[i];
     }
 }
 
 template<typename T>
-void Stack<T>::operator=(const Stack<T> &right) {
+Stack<T> &Stack<T>::operator=(const Stack<T> &right) {
     capacity = right.capacity;
     size = right.size;
+    delete [] data;
     data = new T [capacity];
+    assert(data != nullptr);
     for (int i = 0; i < size; i ++) {
         data[i] = right.data[i];
     }
+    return *this;
 }
 
 template<typename T>
@@ -85,6 +91,7 @@ template<typename T>
 void Stack<T>::push(const T &data_) {
     if (size >= capacity * 0.75) {
         T *newData = new T [capacity * 2];
+        assert(newData != nullptr);
         for (int i = 0; i < size; i ++) {
             newData[i] = data[i];
         }

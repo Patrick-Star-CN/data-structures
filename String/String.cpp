@@ -132,14 +132,14 @@ std::ostream &operator<<(std::ostream &out, const String &str) {
     return out;
 }
 
-String operator+(const String &left, const String &right) {
-    String newString(left);
+String String::operator+(const String &right) {
+    String newString(*this);
     newString += right;
     return newString;
 }
 
 int String::KMPMatch(const String &pattern, unsigned num = 0) const {
-    int *prefix = getPrefix(pattern.buffer, pattern.length());
+    int *prefix = pattern.getPrefix();
     int tar = 0, pos = 0, num_ = 0;
     while (tar < length()) {
         if (buffer[tar] == pattern.buffer[pos]) {
@@ -161,12 +161,12 @@ int String::KMPMatch(const String &pattern, unsigned num = 0) const {
     return -1;
 }
 
-int *String::getPrefix(char *buffer_, int length) const {
-    int *prefix = new int[length];
+int *String::getPrefix() const {
+    int *prefix = new int[bufLen];
     prefix[0] = 0;
     int i = 1, now = 0;
-    while (i < length) {
-        if (buffer_[i] == buffer_[now]) {
+    while (i < bufLen) {
+        if (buffer[i] == buffer[now]) {
             now ++;
             prefix[i] = now;
             i ++;
@@ -229,14 +229,19 @@ String String::subString(unsigned pos, unsigned len) const {
     return newStr;
 }
 
-String replace_all(const String &str, const String &subString, const String &newSubstring) {
+String String::replaceAll(const String &subString_, const String &newSubstring) {
     String newStr;
-    int i = str.KMPMatch(subString, 0), j = 0, k = 0;
-    for (; i != -1; k ++, i = str.KMPMatch(subString, k)) {
-        newStr += str.subString(j, i - j);
+    int i = KMPMatch(subString_, 0), j = 0, k = 0;
+    for (; i != -1; k ++, i = KMPMatch(subString_, k)) {
+        newStr += subString(j, i - j);
         newStr += newSubstring;
-
-        j = i + cStrLen(subString.getBuffer());
+        j = i + cStrLen(subString_.getBuffer());
     }
+    newStr += subString(j, bufLen - j);
+    (*this) = newStr;
     return newStr;
+}
+
+unsigned String::find(const String &subString_, unsigned num) const {
+    return KMPMatch(subString_, num);
 }

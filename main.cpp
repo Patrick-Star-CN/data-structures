@@ -1,6 +1,6 @@
 #include <iostream>
-#include <ctype.h>
 #include "Stack/Stack.h"
+#include "String/String.h"
 using namespace std;
 
 template<typename T>
@@ -22,6 +22,7 @@ T __cal(T left, T right, char c) {
     if (typeid(T) == typeid(int) && c == '%') {
         return (int)left % (int)right;
     }
+    throw "OPERATOR_ERROR";
 }
 
 template<typename T1, typename T2>
@@ -44,7 +45,7 @@ void cal(Stack<T> &number) {
     T num;
     while ((c = cin.peek()) != '\n') {
         if (c == ' ') {
-            c = getchar();
+            getchar();
             continue;
         } else if (isdigit(c)) {
             cin >> num;
@@ -57,12 +58,12 @@ void cal(Stack<T> &number) {
             cin >> c;
             if (c == '(') {
                 operatorChar.push(c);
-                if (cin.peek() == ' ') {
-                    c = getchar();
+                while (cin.peek() == ' ') {
+                    getchar();
                 }
                 if (cin.peek() == '-') {
                     flag = true;
-                    c = getchar();
+                    getchar();
                 }
             } else if (c == ')') {
                 while (operatorChar.top() != '(') {
@@ -82,12 +83,10 @@ void cal(Stack<T> &number) {
     while (!operatorChar.empty()) {
         _cal<T, char>(number, operatorChar);
     }
-    cout << number.top();
+    cout << "ans=" << number.top();
 }
 
-
-
-int  main() {
+int main() {
     int typeNum;
     cout << "请输入想要计算的表达式类型：" << endl
          << "1: 整数型;" << endl

@@ -2,6 +2,7 @@
 #define DATA_STRUCTURES_ARRAYLIST_H
 
 #include <iostream>
+#include <cassert>
 template <typename T>
 class LinkList {
 private:
@@ -21,27 +22,19 @@ private:
 
 public:
     LinkList();
-
     LinkList(T);
-
     LinkList(const LinkList<T> &);
-
     virtual ~LinkList();
 
     LinkList<T>::ListNode *getHead() const;
-
     int getLength() const;
 
     void insert(T);
-
     void display(std::ostream&);
-
     void erase(T data);
-
     bool empty();
 
     bool operator==(const LinkList &) const;
-
     bool operator!=(const LinkList &) const;
 
 };
@@ -57,6 +50,7 @@ LinkList<T>::LinkList() {
 template<typename T>
 LinkList<T>::LinkList(T data) {
     auto node = new ListNode(data);
+    assert(node != nullptr);
     head = node;
     length = 1;
 }
@@ -90,6 +84,7 @@ int LinkList<T>::getLength() const {
 template<typename T>
 void LinkList<T>::insert(T data) {
     auto node = new ListNode(data);
+    assert(node != nullptr);
     length ++;
     if (empty()) {
         head = node;
@@ -150,6 +145,7 @@ LinkList<T>::LinkList(const LinkList<T> &right) {
     auto _ptr = head;
     while (ptr != nullptr) {
         auto node = new ListNode(ptr->data);
+        assert(node != nullptr);
         _ptr->next = node;
         _ptr = _ptr->next;
         ptr = ptr->next;
