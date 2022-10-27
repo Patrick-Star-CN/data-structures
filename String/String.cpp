@@ -245,3 +245,33 @@ String String::replaceAll(const String &subString_, const String &newSubstring) 
 unsigned String::find(const String &subString_, unsigned num) const {
     return KMPMatch(subString_, num);
 }
+
+std::istream &String::read(std::istream &in, char delim) {
+    while (in.peek() != delim && in.peek() != '\n') {
+        if (in.peek() == ' ') {
+            getchar();
+            continue;
+        }
+        (*this) += char(getchar());
+    }
+    return in;
+}
+
+String String::reverse(const String::iterator begin, const String::iterator end) {
+    String str;
+    for (char *ptr = begin.ptr, ptr != end.ptr; )
+    return str;
+}
+
+String::iterator String::begin() const {
+    return String::iterator(buffer);
+}
+
+String::iterator String::end() const {
+    return String::iterator(buffer + bufLen);
+}
+
+String toString(int number) {
+
+    return String();
+}

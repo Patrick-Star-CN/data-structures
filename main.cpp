@@ -1,6 +1,7 @@
 #include <iostream>
 #include "Stack/Stack.h"
 #include "String/String.h"
+#include <sstream>
 using namespace std;
 
 template<typename T>
@@ -25,12 +26,12 @@ T __cal(T left, T right, char c) {
     throw "OPERATOR_ERROR";
 }
 
-template<typename T1, typename T2>
-void _cal(Stack<T1> &number, Stack<T2> &operatorChar) {
-    T1 sum;
+template<typename T>
+void _cal(Stack<T> &number, Stack<char> &operatorChar) {
+    T sum;
     sum = number.top();
     number.pop();
-    sum = __cal<T1>(number.top(), sum, operatorChar.top());
+    sum = __cal<T>(number.top(), sum, operatorChar.top());
     number.pop();
     number.push(sum);
     //cout << sum << endl;
@@ -38,42 +39,42 @@ void _cal(Stack<T1> &number, Stack<T2> &operatorChar) {
 }
 
 template<typename T>
-void cal(Stack<T> &number) {
+void cal(Stack<T> &number, istream &in) {
     Stack<char> operatorChar;
     char c;
     bool flag = false;
     T num;
-    while ((c = cin.peek()) != '\n') {
+    while ((c = in.peek()) != '\n') {
         if (c == ' ') {
             getchar();
             continue;
         } else if (isdigit(c)) {
-            cin >> num;
+            in >> num;
             if (flag) {
                 num = -num;
                 flag = false;
             }
             number.push(num);
         } else {
-            cin >> c;
+            in >> c;
             if (c == '(') {
                 operatorChar.push(c);
-                while (cin.peek() == ' ') {
+                while (in.peek() == ' ') {
                     getchar();
                 }
-                if (cin.peek() == '-') {
+                if (in.peek() == '-') {
                     flag = true;
                     getchar();
                 }
             } else if (c == ')') {
                 while (operatorChar.top() != '(') {
-                    _cal<T, char>(number, operatorChar);
+                    _cal<T>(number, operatorChar);
                 }
                 operatorChar.pop();
             } else if (c == '-' && number.empty()) {
                 flag = true;
             } else if (!operatorChar.empty() && (operatorChar.top() == '*' || operatorChar.top() == '/' || operatorChar.top() == '%')) {
-                _cal<T, char>(number, operatorChar);
+                _cal<T>(number, operatorChar);
                 operatorChar.push(c);
             } else {
                 operatorChar.push(c);
@@ -81,7 +82,7 @@ void cal(Stack<T> &number) {
         }
     }
     while (!operatorChar.empty()) {
-        _cal<T, char>(number, operatorChar);
+        _cal<T>(number, operatorChar);
     }
     cout << "ans=" << number.top();
 }
@@ -93,12 +94,12 @@ int main() {
          << "2: 浮点型;" << endl
          << "3: 变量型;" << endl;
     cin >> typeNum;
-    char ch = getchar();
+    getchar();
     switch (typeNum) {
         case 1: {
             Stack<int> number;
             try {
-                cal<int>(number);
+                cal<int>(number, cin);
             } catch (const char *error) {
                 cout << "输入的表达式有误" << endl;
             }
@@ -107,14 +108,33 @@ int main() {
         case 2: {
             Stack<double> number;
             try {
-                cal<double>(number);
+                cal<double>(number, cin);
             } catch (const char *error) {
                 cout << "输入的表达式有误" << endl;
             }
             break;
         }
         case 3: {
-
+            Stack<double> number;
+            String str(unsigned(100)), str_;
+            stringstream ss;
+            int a;
+            str.getLine(cin);
+            while (cin.peek() != '\n') {
+                str_.read(cin, ':');
+                getchar();
+                cout << str_ << " ";
+                cin >> a;
+                cout << a;
+            }
+            str.replaceAll(str_, toString(a));
+            /*ss >> str;
+            try {
+                cal<double>(number, ss);
+            } catch (const char *error) {
+                cout << "输入的表达式有误" << endl;
+            }*/
+            break;
         }
     }
     return 0;
