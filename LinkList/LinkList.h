@@ -3,7 +3,8 @@
 
 #include <iostream>
 #include <cassert>
-template <typename T>
+
+template<typename T>
 class LinkList {
 private:
     class ListNode {
@@ -22,19 +23,27 @@ private:
 
 public:
     LinkList();
+
     LinkList(T);
+
     LinkList(const LinkList<T> &);
+
     virtual ~LinkList();
 
     LinkList<T>::ListNode *getHead() const;
+
     int getLength() const;
 
     void insert(T);
-    void display(std::ostream&);
+
+    void display(std::ostream &);
+
     void erase(T data);
+
     bool empty();
 
     bool operator==(const LinkList &) const;
+
     bool operator!=(const LinkList &) const;
 
 };
@@ -85,7 +94,7 @@ template<typename T>
 void LinkList<T>::insert(T data) {
     auto node = new ListNode(data);
     assert(node != nullptr);
-    length ++;
+    length++;
     if (empty()) {
         head = node;
         return;
@@ -111,7 +120,7 @@ void LinkList<T>::erase(T data) {
     auto ptr = head;
     if (ptr->data == data) {
         head = ptr->next;
-        length --;
+        length--;
         delete ptr;
         ptr = nullptr;
         return;
@@ -123,7 +132,7 @@ void LinkList<T>::erase(T data) {
             ptr_->next = ptr->next;
             delete ptr;
             ptr = nullptr;
-            length --;
+            length--;
             return;
         }
         ptr_ = ptr;

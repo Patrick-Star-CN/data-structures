@@ -1,50 +1,50 @@
 #include "String.h"
 
-unsigned String::length() const{
+unsigned String::length() const {
     return cStrLen(buffer);
 }
 
-String::String(): bufLen(1) {
+String::String() : bufLen(1) {
     buffer = new char[bufLen];
     assert(buffer != nullptr);
     buffer[0] = '\0';
 }
 
-String::String(unsigned size): bufLen(size) {
+String::String(unsigned size) : bufLen(size) {
     buffer = new char[size];
     assert(buffer != nullptr);
-    for (unsigned i = 0; i < bufLen; i ++) {
+    for (unsigned i = 0; i < bufLen; i++) {
         buffer[i] = '\0';
     }
 }
 
-String::String(char c): bufLen(2) {
+String::String(char c) : bufLen(2) {
     buffer = new char[bufLen];
     assert(buffer != nullptr);
     buffer[0] = c;
     buffer[1] = '\0';
 }
 
-String::String(const char *initStr): bufLen(1 + cStrLen(initStr)){
+String::String(const char *initStr) : bufLen(1 + cStrLen(initStr)) {
     buffer = new char[bufLen];
     assert(buffer != nullptr);
-    for (unsigned i = 0; i < bufLen - 1; i ++) {
+    for (unsigned i = 0; i < bufLen - 1; i++) {
         buffer[i] = initStr[i];
     }
     buffer[bufLen - 1] = '\0';
 }
 
-String::String(const String &initStr): bufLen(1 + cStrLen(initStr.buffer)) {
+String::String(const String &initStr) : bufLen(1 + cStrLen(initStr.buffer)) {
     buffer = new char[bufLen];
     assert(buffer != nullptr);
-    for (unsigned i = 0; i < bufLen - 1; i ++) {
+    for (unsigned i = 0; i < bufLen - 1; i++) {
         buffer[i] = initStr.buffer[i];
     }
     buffer[bufLen - 1] = '\0';
 }
 
 String::~String() {
-    delete []buffer;
+    delete[]buffer;
     bufLen = 0;
     buffer = nullptr;
 }
@@ -56,13 +56,13 @@ char *String::getBuffer() const {
 String &String::operator=(const String &right) {
     const unsigned rightLength = right.length();
     if (rightLength >= bufLen) {
-        delete []buffer;
+        delete[]buffer;
         bufLen = 1 + rightLength;
         buffer = new char[bufLen];
         assert(buffer != nullptr);
     }
     unsigned i = 0;
-    for (; right.buffer[i] != '\0'; i ++) {
+    for (; right.buffer[i] != '\0'; i++) {
         buffer[i] = right.buffer[i];
     }
     buffer[i] = '\0';
@@ -72,13 +72,13 @@ String &String::operator=(const String &right) {
 String &String::operator=(const char *right) {
     const unsigned rightLength = cStrLen(right);
     if (rightLength >= bufLen) {
-        delete []buffer;
+        delete[]buffer;
         bufLen = 1 + rightLength;
         buffer = new char[bufLen];
         assert(buffer != nullptr);
     }
     unsigned i = 0;
-    for (; right[i] != '\0'; i ++) {
+    for (; right[i] != '\0'; i++) {
         buffer[i] = right[i];
     }
     buffer[i] = '\0';
@@ -86,6 +86,7 @@ String &String::operator=(const char *right) {
 }
 
 char nothing;
+
 char &String::operator[](unsigned index) {
     if (index >= cStrLen(buffer)) {
         nothing = '\0';
@@ -98,7 +99,7 @@ int String::compare(const String &right) {
     char *p = buffer;
     char *q = right.buffer;
 
-    for (; (*p != '\0') && (*p == *q); p ++, q ++);
+    for (; (*p != '\0') && (*p == *q); p++, q++);
     return *p - *q;
 }
 
@@ -113,7 +114,7 @@ std::istream &String::getLine(std::istream &in) {
 
 unsigned cStrLen(const char *s) {
     unsigned len = 0;
-    for(; s[len] != '\0'; len ++);
+    for (; s[len] != '\0'; len++);
     return len;
 }
 
@@ -143,19 +144,19 @@ int String::KMPMatch(const String &pattern, unsigned num = 0) const {
     int tar = 0, pos = 0, num_ = 0;
     while (tar < length()) {
         if (buffer[tar] == pattern.buffer[pos]) {
-            tar ++;
-            pos ++;
+            tar++;
+            pos++;
         } else if (pos != 0) {
             pos = prefix[pos - 1];
         } else {
-            tar ++;
+            tar++;
         }
 
         if (pos == pattern.length()) {
             if (num == num_) {
                 return tar - pos;
             }
-            num_ ++;
+            num_++;
         }
     }
     return -1;
@@ -167,13 +168,13 @@ int *String::getPrefix() const {
     int i = 1, now = 0;
     while (i < bufLen) {
         if (buffer[i] == buffer[now]) {
-            now ++;
+            now++;
             prefix[i] = now;
-            i ++;
+            i++;
         } else if (now != 0) {
             now = prefix[now - 1];
         } else {
-            i ++;
+            i++;
             prefix[i] = now;
         }
     }
@@ -209,21 +210,21 @@ void String::operator+=(const String &right) {
     char *newBuffer = new char[len];
     assert(newBuffer != nullptr);
     int i = 0;
-    for (; i < bufLen - 1; i ++) {
+    for (; i < bufLen - 1; i++) {
         newBuffer[i] = buffer[i];
     }
-    for (int j = 0; i < len - 1; i ++, j ++) {
+    for (int j = 0; i < len - 1; i++, j++) {
         newBuffer[i] = right.buffer[j];
     }
     newBuffer[i] = '\0';
     bufLen = len;
-    delete []buffer;
+    delete[]buffer;
     buffer = newBuffer;
 }
 
 String String::subString(unsigned pos, unsigned len) const {
     String newStr(len + 1);
-    for (int i = pos, j = 0; i < pos + len; i ++, j ++) {
+    for (int i = pos, j = 0; i < pos + len; i++, j++) {
         newStr.buffer[j] = buffer[i];
     }
     return newStr;
@@ -232,7 +233,7 @@ String String::subString(unsigned pos, unsigned len) const {
 String String::replaceAll(const String &subString_, const String &newSubstring) {
     String newStr;
     int i = KMPMatch(subString_, 0), j = 0, k = 0;
-    for (; i != -1; k ++, i = KMPMatch(subString_, k)) {
+    for (; i != -1; k++, i = KMPMatch(subString_, k)) {
         newStr += subString(j, i - j);
         newStr += newSubstring;
         j = i + cStrLen(subString_.getBuffer());
@@ -257,18 +258,18 @@ std::istream &String::read(std::istream &in, char delim) {
     return in;
 }
 
-String String::reverse(const String::iterator begin, const String::iterator end) {
+String String::reverse(const String::Iterator begin, const String::Iterator end) {
     String str;
     for (char *ptr = begin.ptr, ptr != end.ptr; )
     return str;
 }
 
-String::iterator String::begin() const {
-    return String::iterator(buffer);
+String::Iterator String::begin() const {
+    return String::Iterator(buffer);
 }
 
-String::iterator String::end() const {
-    return String::iterator(buffer + bufLen);
+String::Iterator String::end() const {
+    return String::Iterator(buffer + bufLen);
 }
 
 String toString(int number) {

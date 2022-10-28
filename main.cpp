@@ -2,10 +2,11 @@
 #include "Stack/Stack.h"
 #include "String/String.h"
 #include <sstream>
+
 using namespace std;
 
 template<typename T>
-T __cal(T left, T right, char c) {
+T baseCal(T left, T right, char c) {
     switch (c) {
         case '+': {
             return left + right;
@@ -21,17 +22,17 @@ T __cal(T left, T right, char c) {
         }
     }
     if (typeid(T) == typeid(int) && c == '%') {
-        return (int)left % (int)right;
+        return (int) left % (int) right;
     }
-    throw "OPERATOR_ERROR";
+    throw std::runtime_error("OPERATOR_ERROR");
 }
 
 template<typename T>
-void _cal(Stack<T> &number, Stack<char> &operatorChar) {
+void calculate(Stack<T> &number, Stack<char> &operatorChar) {
     T sum;
     sum = number.top();
     number.pop();
-    sum = __cal<T>(number.top(), sum, operatorChar.top());
+    sum = baseCal<T>(number.top(), sum, operatorChar.top());
     number.pop();
     number.push(sum);
     //cout << sum << endl;
@@ -68,13 +69,14 @@ void cal(Stack<T> &number, istream &in) {
                 }
             } else if (c == ')') {
                 while (operatorChar.top() != '(') {
-                    _cal<T>(number, operatorChar);
+                    calculate<T>(number, operatorChar);
                 }
                 operatorChar.pop();
             } else if (c == '-' && number.empty()) {
                 flag = true;
-            } else if (!operatorChar.empty() && (operatorChar.top() == '*' || operatorChar.top() == '/' || operatorChar.top() == '%')) {
-                _cal<T>(number, operatorChar);
+            } else if (!operatorChar.empty() &&
+                       (operatorChar.top() == '*' || operatorChar.top() == '/' || operatorChar.top() == '%')) {
+                calculate<T>(number, operatorChar);
                 operatorChar.push(c);
             } else {
                 operatorChar.push(c);
@@ -82,7 +84,7 @@ void cal(Stack<T> &number, istream &in) {
         }
     }
     while (!operatorChar.empty()) {
-        _cal<T>(number, operatorChar);
+        calculate<T>(number, operatorChar);
     }
     cout << "ans=" << number.top();
 }
@@ -118,6 +120,9 @@ int main() {
             Stack<double> number;
             String str(unsigned(100)), str_;
             stringstream ss;
+            string s;
+            auto aaa = s.begin();
+            (*aaa) = 'a';
             int a;
             str.getLine(cin);
             while (cin.peek() != '\n') {
