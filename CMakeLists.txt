@@ -3,6 +3,6 @@ project(data_structures)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(data_structures main.cpp
+add_executable(data_structures
         LinkList/LinkList.h
-        String/String.h String/String.cpp Stack/Stack.h Iterator/Iterator.h)
+        String/String.h String/String.cpp Stack/Stack.h Iterator/Iterator.h main.cpp)

@@ -17,9 +17,20 @@ private:
 
     class Iterator {
     public:
-        char *ptr;
+        Iterator(char *ptr) : now(ptr) {}
 
-        Iterator(char *ptr) : ptr(ptr) {}
+        Iterator() : now(nullptr) {}
+
+        bool operator==(const Iterator &rhs) const;
+
+        bool operator!=(const Iterator &rhs) const;
+
+        Iterator operator++(int i);
+
+        char &operator*() const;
+
+    private:
+        char *now;
     };
 
 public:
@@ -42,6 +53,8 @@ public:
     String &operator=(const char *);
 
     String operator+(const String &right);
+
+    friend String operator+(const char, String &right);
 
     char &operator[](unsigned);
 

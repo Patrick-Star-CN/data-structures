@@ -206,14 +206,14 @@ bool String::operator!=(const String &right) {
 }
 
 void String::operator+=(const String &right) {
-    int len = bufLen + right.bufLen - 1;
+    unsigned int len = bufLen + right.bufLen - 1;
     char *newBuffer = new char[len];
     assert(newBuffer != nullptr);
     int i = 0;
     for (; i < bufLen - 1; i++) {
         newBuffer[i] = buffer[i];
     }
-    for (int j = 0; i < len - 1; i++, j++) {
+    for (unsigned int j = 0; i < len - 1; i++, j++) {
         newBuffer[i] = right.buffer[j];
     }
     newBuffer[i] = '\0';
@@ -224,7 +224,7 @@ void String::operator+=(const String &right) {
 
 String String::subString(unsigned pos, unsigned len) const {
     String newStr(len + 1);
-    for (int i = pos, j = 0; i < pos + len; i++, j++) {
+    for (unsigned int i = pos, j = 0; i < pos + len; i++, j++) {
         newStr.buffer[j] = buffer[i];
     }
     return newStr;
@@ -260,7 +260,9 @@ std::istream &String::read(std::istream &in, char delim) {
 
 String String::reverse(const String::Iterator begin, const String::Iterator end) {
     String str;
-    for (char *ptr = begin.ptr, ptr != end.ptr; )
+    for (Iterator it = begin; it != end; it++) {
+        str = *it + str;
+    }
     return str;
 }
 
@@ -275,4 +277,32 @@ String::Iterator String::end() const {
 String toString(int number) {
 
     return String();
+}
+
+String operator+(const char c, String &right) {
+    unsigned int len = right.length() + 1;
+    String str(len);
+    str.buffer[0] = c;
+    int i = 1;
+    for (; i < right.bufLen - 1; i++) {
+        str.buffer[i] = right.buffer[i - 1];
+    }
+    str.buffer[i] = '\0';
+    return str;
+}
+
+String::Iterator String::Iterator::operator++(int i) {
+    return Iterator(now ++);
+}
+
+bool String::Iterator::operator==(const String::Iterator &rhs) const {
+    return now == rhs.now;
+}
+
+bool String::Iterator::operator!=(const String::Iterator &rhs) const {
+    return !(rhs == *this);
+}
+
+char &String::Iterator::operator*() const{
+    return *now;
 }

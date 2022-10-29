@@ -4,14 +4,10 @@
 template<typename T>
 class BaseIterator {
 public:
-    virtual BaseIterator<T> begin() = 0;
-
-    virtual BaseIterator<T> end() = 0;
-
     virtual constexpr BaseIterator<T> operator++(int) = 0;
 
-private:
-    T now;
+protected:
+    T *now;
 };
 
 template<typename T>
@@ -35,9 +31,11 @@ public:
 };
 
 template<typename T>
-class RandomAccessIterator :public BidirectionalIterator<T> {
+class RandomAccessIterator : public BidirectionalIterator<T> {
 public:
+    virtual constexpr BaseIterator<T> operator+(int) = 0;
 
+    virtual constexpr BaseIterator<T> operator-(int) = 0;
 };
 
 #endif //DATA_STRUCTURES_ITERATOR_H
