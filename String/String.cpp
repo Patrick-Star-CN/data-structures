@@ -139,7 +139,7 @@ String String::operator+(const String &right) {
     return newString;
 }
 
-int String::KMPMatch(const String &pattern, unsigned num = 0) const {
+int String::KMPMatch(const String &pattern, unsigned int num = 0) const {
     int *prefix = pattern.getPrefix();
     int tar = 0, pos = 0, num_ = 0;
     while (tar < length()) {
@@ -248,6 +248,7 @@ unsigned String::find(const String &subString_, unsigned num) const {
 }
 
 std::istream &String::read(std::istream &in, char delim) {
+    clear();
     while (in.peek() != delim && in.peek() != '\n') {
         if (in.peek() == ' ') {
             getchar();
@@ -271,28 +272,49 @@ String::Iterator String::begin() const {
 }
 
 String::Iterator String::end() const {
-    return String::Iterator(buffer + bufLen);
+    return String::Iterator(buffer + cStrLen(buffer));
 }
 
 String toString(int number) {
-
-    return String();
+    String str;
+    if (number < 0) {
+        str += '-';
+        number = -number;
+    } else if (!number) {
+        str = '0';
+        return str;
+    }
+    while (number) {
+        str = char(number % 10 + '0') + str;
+        number /= 10;
+    }
+    return str;
 }
 
 String operator+(const char c, String &right) {
-    unsigned int len = right.length() + 1;
-    String str(len);
+    String str(right.length() + 1);
     str.buffer[0] = c;
     int i = 1;
-    for (; i < right.bufLen - 1; i++) {
+    for (; i < right.bufLen; i++) {
         str.buffer[i] = right.buffer[i - 1];
     }
     str.buffer[i] = '\0';
     return str;
 }
 
+void String::clear() {
+    bufLen = 1;
+    delete[] buffer;
+    buffer = new char[1];
+    buffer[0] = '\0';
+}
+
+String::operator char *() const {
+    return buffer;
+}
+
 String::Iterator String::Iterator::operator++(int i) {
-    return Iterator(now ++);
+    return Iterator(now++);
 }
 
 bool String::Iterator::operator==(const String::Iterator &rhs) const {
@@ -303,6 +325,10 @@ bool String::Iterator::operator!=(const String::Iterator &rhs) const {
     return !(rhs == *this);
 }
 
-char &String::Iterator::operator*() const{
+char &String::Iterator::operator*() const {
     return *now;
+}
+
+String::Iterator String::Iterator::operator--(int) {
+    return Iterator(now--);
 }

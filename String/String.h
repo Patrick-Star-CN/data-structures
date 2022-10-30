@@ -6,14 +6,16 @@
 
 class String {
 private:
-    unsigned bufLen;
+    unsigned int bufLen;
     char *buffer;
 
     int *getPrefix() const;
 
-    int KMPMatch(const String &pattern, unsigned) const;
+    int KMPMatch(const String &pattern, unsigned int) const;
 
     int compare(const String &);
+
+    void clear();
 
     class Iterator {
     public:
@@ -25,7 +27,9 @@ private:
 
         bool operator!=(const Iterator &rhs) const;
 
-        Iterator operator++(int i);
+        Iterator operator++(int);
+
+        Iterator operator--(int);
 
         char &operator*() const;
 
@@ -46,7 +50,9 @@ public:
 
     ~String();
 
-    explicit operator const char *() const;
+    operator const char *() const;
+
+    operator char *() const;
 
     String &operator=(const String &);
 
