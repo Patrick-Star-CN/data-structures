@@ -106,7 +106,7 @@ int main() {
     } else if (str.find(".") != -1) {
         typeNum = 2;
     } else {
-        for (auto it = str.begin(); it != str.end(); it ++) {
+        for (auto it = str.begin(); it != str.end(); it++) {
             if (isalpha(*it)) {
                 typeNum = 3;
                 break;
