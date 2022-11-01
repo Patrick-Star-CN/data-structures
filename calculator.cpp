@@ -31,9 +31,11 @@ void calculate(Stack<T> &number, Stack<char> &operatorChar) {
     T sum;
     sum = number.top();
     number.pop();
+    //cout << number.top() << char(operatorChar.top()) << sum;
     sum = baseCal<T>(number.top(), sum, operatorChar.top());
     number.pop();
     number.push(sum);
+    //cout << "=" << sum << endl;
     operatorChar.pop();
 }
 
@@ -73,7 +75,8 @@ void cal(Stack<T> &number, istream &in) {
             } else if (c == '-' && number.empty()) {
                 flag = true;
             } else if (!operatorChar.empty() &&
-                       (operatorChar.top() == '*' || operatorChar.top() == '/' || operatorChar.top() == '%')) {
+                       (operatorChar.top() == '*' || operatorChar.top() == '/' || operatorChar.top() == '%' ||
+                        c == '-' || c == '+')) {
                 calculate<T>(number, operatorChar);
                 operatorChar.push(c);
             } else {
@@ -101,9 +104,9 @@ int main() {
     String str(unsigned(100));
     cout << "请输入表达式(推荐数字或变量与符号之间用空格间隔,请使用半角符号)" << endl;
     str.getLine(cin);
-    if (str.find("%") != -1) {
+    if (str.find(String("%")) != -1) {
         typeNum = 1;
-    } else if (str.find(".") != -1) {
+    } else if (str.find(String(".")) != -1) {
         typeNum = 2;
     } else {
         for (auto it = str.begin(); it != str.end(); it++) {
@@ -149,7 +152,7 @@ int main() {
                 getchar();
                 cin >> num;
                 sprintf(num_, "%lf", num);
-                str.replaceAll(str_, num_);
+                str.replaceAll(str_, String(num_));
             }
             putBack(cin, str);
             try {

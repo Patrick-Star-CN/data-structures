@@ -254,7 +254,7 @@ std::istream &String::read(std::istream &in, char delim) {
             getchar();
             continue;
         }
-        (*this) += char(getchar());
+        (*this) += String(char(getchar()));
     }
     return in;
 }
@@ -278,10 +278,10 @@ String::Iterator String::end() const {
 String toString(int number) {
     String str;
     if (number < 0) {
-        str += '-';
+        str += String('-');
         number = -number;
     } else if (!number) {
-        str = '0';
+        str = String('0');
         return str;
     }
     while (number) {
@@ -313,7 +313,7 @@ String::operator char *() const {
     return buffer;
 }
 
-String::Iterator String::Iterator::operator++(int i) {
+const String::Iterator String::Iterator::operator++(int i) {
     return Iterator(now++);
 }
 
@@ -329,6 +329,6 @@ char &String::Iterator::operator*() const {
     return *now;
 }
 
-String::Iterator String::Iterator::operator--(int) {
+const String::Iterator String::Iterator::operator--(int) {
     return Iterator(now--);
 }

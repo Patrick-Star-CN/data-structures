@@ -11,7 +11,7 @@ public:
     Stack();
 
     // 构造一个指定缓冲区长度的栈
-    Stack(unsigned);
+    explicit Stack(unsigned);
 
     // 拷贝构造
     Stack(const Stack<T> &);
@@ -20,7 +20,7 @@ public:
     Stack &operator=(const Stack<T> &);
 
     // 赋值运算符重载
-    Stack &operator=(Stack<T> &&);
+    Stack &operator=(Stack<T> &&) noexcept ;
 
     // 判断栈是否为空
     bool empty();
@@ -39,7 +39,7 @@ public:
 
     void swap(Stack<T> &s);
 
-    template <class... Args>
+    template <typename... Args>
     void emplace(Args &&...);
 
 private:
@@ -142,7 +142,7 @@ void Stack<T>::push(T &&v) {
 }
 
 template<typename T>
-Stack<T> &Stack<T>::operator=(Stack<T> &&right) {
+Stack<T> &Stack<T>::operator=(Stack<T> &&right) noexcept {
     capacity = right.capacity;
     size = right.size;
     delete[] data;
@@ -160,7 +160,7 @@ void Stack<T>::swap(Stack<T> &s) {
 }
 
 template<typename T>
-template<class... Args>
+template<typename... Args>
 void Stack<T>::emplace(Args &&... args) {
 
 }
