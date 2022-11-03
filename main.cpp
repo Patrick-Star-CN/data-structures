@@ -1,7 +1,6 @@
-#include <iostream>
-#include <stack>
+#include <deque>
+
 using namespace std;
+
 int main() {
-    stack<int> a;
-    a.emplace()
 }

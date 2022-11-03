@@ -313,8 +313,12 @@ String::operator char *() const {
     return buffer;
 }
 
-const String::Iterator String::Iterator::operator++(int i) {
-    return Iterator(now++);
+String::ConstIterator String::cbegin() const {
+    return String::ConstIterator(buffer);
+}
+
+String::ConstIterator String::cend() const {
+    return String::ConstIterator(buffer + cStrLen(buffer));
 }
 
 bool String::Iterator::operator==(const String::Iterator &rhs) const {
@@ -329,6 +333,58 @@ char &String::Iterator::operator*() const {
     return *now;
 }
 
+const String::Iterator String::Iterator::operator++(int i) {
+    String::Iterator tmp(now);
+    ++(*this);
+    return tmp;
+}
+
 const String::Iterator String::Iterator::operator--(int) {
-    return Iterator(now--);
+    String::Iterator tmp(now);
+    --(*this);
+    return tmp;
+}
+
+String::Iterator &String::Iterator::operator++() {
+    ++now;
+    return (*this);
+}
+
+String::Iterator &String::Iterator::operator--() {
+    --now;
+    return (*this);
+}
+
+bool String::ConstIterator::operator==(const String::ConstIterator &rhs) const {
+    return now == rhs.now;
+}
+
+bool String::ConstIterator::operator!=(const String::ConstIterator &rhs) const {
+    return !(rhs == *this);
+}
+
+const String::ConstIterator String::ConstIterator::operator++(int) {
+    String::ConstIterator tmp(now);
+    ++(*this);
+    return tmp;
+}
+
+const String::ConstIterator String::ConstIterator::operator--(int) {
+    String::ConstIterator tmp(now);
+    --(*this);
+    return tmp;
+}
+
+const char String::ConstIterator::operator*() const {
+    return *now;
+}
+
+String::ConstIterator &String::ConstIterator::operator++() {
+    ++now;
+    return (*this);
+}
+
+String::ConstIterator &String::ConstIterator::operator--() {
+    --now;
+    return (*this);
 }

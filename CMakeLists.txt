@@ -5,4 +5,4 @@ set(CMAKE_CXX_STANDARD 14)
 
 add_executable(data_structures
         LinkList/LinkList.h
-        String/String.h String/String.cpp Stack/Stack.h Iterator/Iterator.h main.cpp calculator.cpp)
+        String/String.h String/String.cpp Stack/Stack.h Iterator/Iterator.h main.cpp calculator.cpp Deque/Deque.h)

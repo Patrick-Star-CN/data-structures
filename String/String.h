@@ -31,10 +31,38 @@ private:
 
         const Iterator operator--(int);
 
+        Iterator &operator++();
+
+        Iterator &operator--();
+
         char &operator*() const;
 
     private:
         char *now;
+    };
+
+    class ConstIterator {
+    public:
+        explicit ConstIterator(const char *ptr) : now(ptr) {}
+
+        ConstIterator() : now(nullptr) {}
+
+        bool operator==(const ConstIterator &rhs) const;
+
+        bool operator!=(const ConstIterator &rhs) const;
+
+        const ConstIterator operator++(int);
+
+        const ConstIterator operator--(int);
+
+        ConstIterator &operator++();
+
+        ConstIterator &operator--();
+
+        const char operator*() const;
+
+    private:
+        const char *now;
     };
 
 public:
@@ -85,6 +113,10 @@ public:
     String::Iterator begin() const;
 
     String::Iterator end() const;
+
+    String::ConstIterator cbegin() const;
+
+    String::ConstIterator cend() const;
 
     String subString(unsigned, unsigned) const;
 
