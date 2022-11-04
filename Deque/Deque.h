@@ -94,7 +94,7 @@ typename Deque<T>::Iterator Deque<T>::begin() {
 
 template<typename T>
 typename Deque<T>::Iterator Deque<T>::end() {
-    return Iterator(data + last + 1, data, capacity);
+    return Iterator(data + (last + 1) % capacity, data, capacity);
 }
 
 template<typename T>
