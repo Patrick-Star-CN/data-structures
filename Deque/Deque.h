@@ -1,276 +1,310 @@
 #ifndef DATA_STRUCTURES_DEQUE_H
 #define DATA_STRUCTURES_DEQUE_H
 
-const int BLOCK_SIZE = 16;
+#include <iostream>
+#include <cassert>
 
 template<typename T>
 class Deque {
 private:
-    class DequeNode {
-    public:
-        DequeNode() : prior(nullptr), next(nullptr) {
-            head = new T[BLOCK_SIZE];
-        }
-
-        explicit DequeNode(DequeNode *prior) : prior(prior), next(nullptr) {
-            head = new T[BLOCK_SIZE];
-        }
-
-        explicit DequeNode(DequeNode *prior, DequeNode *next) : prior(prior), next(next) {
-            head = new T[BLOCK_SIZE];
-        }
-
-        T *getHead() const {
-            return head;
-        }
-
-        void setHead(T *head) {
-            DequeNode::head = head;
-        }
-
-        DequeNode *getNext() const {
-            return next;
-        }
-
-        void setNext(DequeNode *next) {
-            DequeNode::next = next;
-        }
-
-        DequeNode *getPrior() const {
-            return prior;
-        }
-
-        void setPrior(DequeNode *prior) {
-            DequeNode::prior = prior;
-        }
-
+    class Iterator {
     private:
-        T *head;
-        DequeNode *next;
-        DequeNode *prior;
-    };
-
-    class DequeMapIterator {
-    private:
-        DequeNode *ptr;
+        T *first;
+        T *ptr;
+        unsigned int capacity;
 
     public:
-        DequeMapIterator() : ptr(nullptr) {}
+        Iterator() : ptr(nullptr), first(nullptr), capacity(0) {}
 
-        explicit DequeMapIterator(DequeNode *ptr) : ptr(ptr) {}
+        explicit Iterator(T *p, T *data, unsigned int capacity) : ptr(p), first(data), capacity(capacity) {}
 
-        DequeMapIterator(const DequeMapIterator &right) : ptr(right.ptr) {}
+        Iterator(const Iterator &right) : ptr(right.ptr) {}
 
-        const DequeMapIterator operator++(int);
+        const Iterator operator++(int);
 
-        const DequeMapIterator operator--(int);
+        const Iterator operator--(int);
 
-        DequeMapIterator &operator++();
+        Iterator &operator++();
 
-        DequeMapIterator &operator--();
+        Iterator &operator--();
 
-        DequeMapIterator operator+(int);
+        Iterator operator+(int);
 
-        DequeMapIterator operator-(int);
+        Iterator operator-(int);
 
-        DequeMapIterator &operator+=(int);
+        Iterator &operator+=(int);
 
-        DequeMapIterator &operator-=(int);
+        Iterator &operator-=(int);
 
-        DequeNode *operator*();
-    };
+        bool operator==(const Iterator &) const;
 
-    class DequeIterator {
-    private:
-        DequeMapIterator *first;
-        DequeNode *ptr;
-
-    public:
-        DequeIterator() : ptr(nullptr) {}
-
-        explicit DequeIterator(DequeNode *ptr) : ptr(ptr) {}
-
-        DequeIterator(const DequeIterator &right) : ptr(right.ptr), first(right.first) {}
-
-        const DequeIterator operator++(int);
-
-        const DequeIterator operator--(int);
-
-        DequeIterator &operator++();
-
-        DequeIterator &operator--();
-
-        DequeIterator operator+(int);
-
-        DequeIterator operator-(int);
-
-        DequeIterator &operator+=(int);
-
-        DequeIterator &operator-=(int);
+        bool operator!=(const Iterator &) const;
 
         T &operator*();
     };
 
-    T *head;
+    T *data;
+    unsigned int capacity;
+    unsigned int size;
+    unsigned int first;
+    unsigned int last;
+
+    void zoom();
 
 public:
+    Iterator begin();
+
+    Iterator end();
+
+    Deque() : data(nullptr), first(0), last(0), capacity(0), size(0) {}
+
+    explicit Deque(unsigned int capacity) : first(0), last(0), capacity(capacity), size(0) {
+        data = new(std::nothrow) T[capacity];
+        assert(data != nullptr);
+    }
+
+    ~Deque() {
+        delete[] data;
+        data = nullptr;
+    }
+
+    void pushBack(const T &);
+
+    void pushBack(T &&);
+
+    void pushFront(const T &);
+
+    void pushFront(T &&);
+
+    void popBack();
+
+    void popFront();
+
+    T &back();
+
+    T &front();
+
+    bool empty();
 };
 
 template<typename T>
-const typename Deque<T>::DequeIterator Deque<T>::DequeIterator::operator++(int) {
-    Deque::DequeIterator tmp(*this);
+typename Deque<T>::Iterator Deque<T>::begin() {
+    return Iterator(data + first, data, capacity);
+}
+
+template<typename T>
+typename Deque<T>::Iterator Deque<T>::end() {
+    return Iterator(data + last + 1, data, capacity);
+}
+
+template<typename T>
+void Deque<T>::pushBack(const T &v) {
+    if (empty()) {
+        data[0] = v;
+        size = 1;
+        first = 0;
+        last = 0;
+        return;
+    }
+    if (size == capacity - 1) {
+        Deque<T>::zoom();
+    }
+    ++last;
+    if (last == first + capacity) {
+        last = 0;
+    }
+    data[last] = v;
+    ++size;
+}
+
+template<typename T>
+void Deque<T>::pushBack(T &&v) {
+    if (empty()) {
+        data[0] = v;
+        size = 1;
+        first = 0;
+        last = 0;
+        return;
+    }
+    if (size == capacity - 1) {
+        Deque<T>::zoom();
+    }
+    ++last;
+    if (last == capacity) {
+        last = 0;
+    }
+    data[last] = v;
+    ++size;
+}
+
+template<typename T>
+void Deque<T>::pushFront(const T &v) {
+    if (empty()) {
+        data[0] = v;
+        size = 1;
+        first = 0;
+        last = 0;
+        return;
+    }
+    if (size == capacity - 1) {
+        Deque<T>::zoom();
+    }
+    if (first == 0) {
+        first = capacity;
+    }
+    --first;
+    data[first] = v;
+    ++size;
+}
+
+template<typename T>
+void Deque<T>::pushFront(T &&v) {
+    if (empty()) {
+        data[0] = v;
+        size = 1;
+        first = 0;
+        last = 0;
+        return;
+    }
+    if (size == capacity - 1) {
+        Deque<T>::zoom();
+    }
+    if (first == 0) {
+        first = capacity;
+    }
+    --first;
+    data[first] = v;
+    ++size;
+}
+
+template<typename T>
+void Deque<T>::popBack() {
+    --last;
+    if (last == -1) {
+        last = capacity - 1;
+    }
+    --size;
+}
+
+template<typename T>
+void Deque<T>::popFront() {
+    ++first;
+    if (first == capacity) {
+        first = 0;
+    }
+    --size;
+}
+
+template<typename T>
+T &Deque<T>::back() {
+    return data[first];
+}
+
+template<typename T>
+T &Deque<T>::front() {
+    return data[last];
+}
+
+template<typename T>
+bool Deque<T>::empty() {
+    return size == 0;
+}
+
+template<typename T>
+void Deque<T>::zoom() {
+    T *newData = new T[capacity * 2];
+    int i = 0;
+    for (Iterator it = begin(); it != end(); it++, i++) {
+        newData[i] = *it;
+    }
+    delete[] data;
+    capacity *= 2;
+    data = newData;
+    first = 0;
+    last = size - 1;
+}
+
+template<typename T>
+const typename Deque<T>::Iterator Deque<T>::Iterator::operator++(int) {
+    Deque::Iterator tmp(*this);
     ++(*this);
     return tmp;
 }
 
 template<typename T>
-const typename Deque<T>::DequeIterator Deque<T>::DequeIterator::operator--(int) {
-    Deque::DequeIterator tmp(*this);
+const typename Deque<T>::Iterator Deque<T>::Iterator::operator--(int) {
+    Deque::Iterator tmp(*this);
     --(*this);
     return tmp;
 }
 
 template<typename T>
-typename Deque<T>::DequeIterator &Deque<T>::DequeIterator::operator++() {
-    if (ptr == nullptr) {
-        return nullptr;
-    } else if (ptr - *first == BLOCK_SIZE) {
-        ++first;
-        ptr = *first;
+typename Deque<T>::Iterator &Deque<T>::Iterator::operator++() {
+    if (ptr - first == capacity - 1) {
+        ptr = first;
+        return (*this);
     }
     ++ptr;
     return (*this);
 }
 
 template<typename T>
-typename Deque<T>::DequeIterator &Deque<T>::DequeIterator::operator--() {
-    if (ptr == nullptr) {
-        return nullptr;
-    } else if (ptr == *first) {
-        --first;
-        ptr = *first + BLOCK_SIZE;
+typename Deque<T>::Iterator &Deque<T>::Iterator::operator--() {
+    if (ptr == first) {
+        ptr = first + capacity;
+        return (*this);
     }
     --ptr;
     return (*this);
 }
 
 template<typename T>
-typename Deque<T>::DequeIterator Deque<T>::DequeIterator::operator+(int n) {
-    Deque::DequeIterator tmp(*this);
+typename Deque<T>::Iterator Deque<T>::Iterator::operator+(int n) {
+    Deque::Iterator tmp(*this);
     tmp += n;
     return tmp;
 }
 
 template<typename T>
-typename Deque<T>::DequeIterator Deque<T>::DequeIterator::operator-(int n) {
-    Deque::DequeIterator tmp(*this);
+typename Deque<T>::Iterator Deque<T>::Iterator::operator-(int n) {
+    Deque::Iterator tmp(*this);
     tmp -= n;
     return tmp;
 }
 
 template<typename T>
-typename Deque<T>::DequeIterator &Deque<T>::DequeIterator::operator+=(int n) {
+typename Deque<T>::Iterator &Deque<T>::Iterator::operator+=(int n) {
     if (n == 0) {
         return (*this);
     }
-    n += ptr - *first;
+    n += ptr - first;
     if (n > 0) {
-        first += n / BLOCK_SIZE;
-        ptr = *first + n % BLOCK_SIZE;
+        ptr = first + n % capacity;
     } else {
-        int z = BLOCK_SIZE - 1 - n;
-        first -= z / BLOCK_SIZE;
-        ptr = *first + (BLOCK_SIZE - 1 - z % BLOCK_SIZE);
+        int z = capacity - 1 - n;
+        ptr = first + (capacity - 1 - z % capacity);
     }
     return (*this);
 }
 
 template<typename T>
-typename Deque<T>::DequeIterator &Deque<T>::DequeIterator::operator-=(int n) {
+typename Deque<T>::Iterator &Deque<T>::Iterator::operator-=(int n) {
     return (*this) += -n;
 }
 
 template<typename T>
-T &Deque<T>::DequeIterator::operator*() {
+T &Deque<T>::Iterator::operator*() {
     return *(ptr);
 }
 
 template<typename T>
-const typename Deque<T>::DequeMapIterator Deque<T>::DequeMapIterator::operator++(int) {
-    Deque<T>::DequeMapIterator tmp(*this);
-    ++(*this);
-    return tmp;
+bool Deque<T>::Iterator::operator==(const Deque::Iterator &rhs) const {
+    return ptr == rhs.ptr;
 }
 
 template<typename T>
-const typename Deque<T>::DequeMapIterator Deque<T>::DequeMapIterator::operator--(int) {
-    Deque<T>::DequeMapIterator tmp(*this);
-    --(*this);
-    return tmp;
-}
-
-template<typename T>
-typename Deque<T>::DequeMapIterator &Deque<T>::DequeMapIterator::operator++() {
-    if (ptr == nullptr) {
-        return nullptr;
-    }
-    ptr = ptr->next;
-    return (*this);
-}
-
-template<typename T>
-typename Deque<T>::DequeMapIterator &Deque<T>::DequeMapIterator::operator--() {
-    if (ptr == nullptr) {
-        return nullptr;
-    }
-    ptr = ptr->prior;
-    return (*this);
-}
-
-template<typename T>
-typename Deque<T>::DequeMapIterator Deque<T>::DequeMapIterator::operator+(int n) {
-    Deque<T>::DequeMapIterator tmp(*this);
-    tmp += n;
-    return tmp;
-}
-
-template<typename T>
-typename Deque<T>::DequeMapIterator Deque<T>::DequeMapIterator::operator-(int n) {
-    Deque<T>::DequeMapIterator tmp(*this);
-    tmp -= n;
-    return tmp;
-}
-
-template<typename T>
-typename Deque<T>::DequeMapIterator &Deque<T>::DequeMapIterator::operator+=(int n) {
-    if (n == 0) {
-        return (*this);
-    } else if (n < 0) {
-        for (int i = 0; i > n; i--) {
-            ptr = ptr->getPrior();
-            if (!ptr) {
-                break;
-            }
-        }
-    } else {
-        for (int i = 0; i < n; i++) {
-            ptr = ptr->getNext();
-            if (!ptr) {
-                break;
-            }
-        }
-    }
-    return (*this);
-}
-
-template<typename T>
-typename Deque<T>::DequeMapIterator &Deque<T>::DequeMapIterator::operator-=(int n) {
-    return (*this) += -n;
-}
-
-template<typename T>
-typename Deque<T>::DequeNode *Deque<T>::DequeMapIterator::operator*() {
-    return ptr;
+bool Deque<T>::Iterator::operator!=(const Deque::Iterator &rhs) const {
+    return !(rhs == *this);
 }
 
 #endif //DATA_STRUCTURES_DEQUE_H

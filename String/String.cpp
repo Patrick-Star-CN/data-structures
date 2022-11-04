@@ -5,13 +5,13 @@ unsigned String::length() const {
 }
 
 String::String() : bufLen(1) {
-    buffer = new char[bufLen];
+    buffer = new(std::nothrow) char[bufLen];
     assert(buffer != nullptr);
     buffer[0] = '\0';
 }
 
 String::String(unsigned size) : bufLen(size) {
-    buffer = new char[size];
+    buffer = new(std::nothrow) char[size];
     assert(buffer != nullptr);
     for (unsigned i = 0; i < bufLen; i++) {
         buffer[i] = '\0';
@@ -19,14 +19,14 @@ String::String(unsigned size) : bufLen(size) {
 }
 
 String::String(char c) : bufLen(2) {
-    buffer = new char[bufLen];
+    buffer = new(std::nothrow) char[bufLen];
     assert(buffer != nullptr);
     buffer[0] = c;
     buffer[1] = '\0';
 }
 
 String::String(const char *initStr) : bufLen(1 + cStrLen(initStr)) {
-    buffer = new char[bufLen];
+    buffer = new(std::nothrow) char[bufLen];
     assert(buffer != nullptr);
     for (unsigned i = 0; i < bufLen - 1; i++) {
         buffer[i] = initStr[i];
@@ -35,7 +35,7 @@ String::String(const char *initStr) : bufLen(1 + cStrLen(initStr)) {
 }
 
 String::String(const String &initStr) : bufLen(1 + cStrLen(initStr.buffer)) {
-    buffer = new char[bufLen];
+    buffer = new(std::nothrow) char[bufLen];
     assert(buffer != nullptr);
     for (unsigned i = 0; i < bufLen - 1; i++) {
         buffer[i] = initStr.buffer[i];
@@ -163,7 +163,8 @@ int String::KMPMatch(const String &pattern, unsigned int num = 0) const {
 }
 
 int *String::getPrefix() const {
-    int *prefix = new int[bufLen];
+    int *prefix = new(std::nothrow) int[bufLen];
+    assert(prefix != nullptr);
     prefix[0] = 0;
     int i = 1, now = 0;
     while (i < bufLen) {
@@ -207,7 +208,7 @@ bool String::operator!=(const String &right) {
 
 void String::operator+=(const String &right) {
     unsigned int len = bufLen + right.bufLen - 1;
-    char *newBuffer = new char[len];
+    char *newBuffer = new(std::nothrow) char[len];
     assert(newBuffer != nullptr);
     int i = 0;
     for (; i < bufLen - 1; i++) {

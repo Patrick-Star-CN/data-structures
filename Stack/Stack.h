@@ -20,13 +20,13 @@ public:
     Stack &operator=(const Stack<T> &);
 
     // 赋值运算符重载
-    Stack &operator=(Stack<T> &&) noexcept ;
+    Stack &operator=(Stack<T> &&) noexcept;
 
     // 判断栈是否为空
     bool empty();
 
     // 返回栈顶元素
-    T top();
+    T &top();
 
     // 往栈顶压入一个元素
     void push(const T &);
@@ -38,9 +38,6 @@ public:
     void pop();
 
     void swap(Stack<T> &s);
-
-    template <typename... Args>
-    void emplace(Args &&...);
 
 private:
     T *data;
@@ -58,7 +55,7 @@ Stack<T>::Stack():data(nullptr), size(0), capacity(10) {
 
 template<typename T>
 Stack<T>::Stack(unsigned int capacity):capacity(capacity), size(0) {
-    data = new T[capacity];
+    data = new(std::nothrow) T[capacity];
     assert(data != nullptr);
 }
 
@@ -66,7 +63,7 @@ template<typename T>
 Stack<T>::Stack(const Stack<T> &right) {
     capacity = right.capacity;
     size = right.size;
-    data = new T[capacity];
+    data = new(std::nothrow) T[capacity];
     assert(data != nullptr);
     for (int i = 0; i < size; i++) {
         data[i] = right.data[i];
@@ -78,7 +75,7 @@ Stack<T> &Stack<T>::operator=(const Stack<T> &right) {
     capacity = right.capacity;
     size = right.size;
     delete[] data;
-    data = new T[capacity];
+    data = new(std::nothrow) T[capacity];
     assert(data != nullptr);
     for (int i = 0; i < size; i++) {
         data[i] = right.data[i];
@@ -100,7 +97,7 @@ bool Stack<T>::empty() {
 }
 
 template<typename T>
-T Stack<T>::top() {
+T &Stack<T>::top() {
     if (empty()) {
         throw std::runtime_error("EMPTY_ERROR");
     }
@@ -110,7 +107,7 @@ T Stack<T>::top() {
 template<typename T>
 void Stack<T>::push(const T &v) {
     if (size >= capacity * 0.75) {
-        T *newData = new T[capacity * 2];
+        T *newData = new(std::nothrow) T[capacity * 2];
         assert(newData != nullptr);
         for (int i = 0; i < size; i++) {
             newData[i] = data[i];
@@ -127,7 +124,7 @@ void Stack<T>::push(const T &v) {
 template<typename T>
 void Stack<T>::push(T &&v) {
     if (size >= capacity * 0.75) {
-        T *newData = new T[capacity * 2];
+        T *newData = new(std::nothrow) T[capacity * 2];
         assert(newData != nullptr);
         for (int i = 0; i < size; i++) {
             newData[i] = data[i];
@@ -146,7 +143,7 @@ Stack<T> &Stack<T>::operator=(Stack<T> &&right) noexcept {
     capacity = right.capacity;
     size = right.size;
     delete[] data;
-    data = new T[capacity];
+    data = new(std::nothrow) T[capacity];
     assert(data != nullptr);
     for (int i = 0; i < size; i++) {
         data[i] = right.data[i];
@@ -156,12 +153,29 @@ Stack<T> &Stack<T>::operator=(Stack<T> &&right) noexcept {
 
 template<typename T>
 void Stack<T>::swap(Stack<T> &s) {
-
-}
-
-template<typename T>
-template<typename... Args>
-void Stack<T>::emplace(Args &&... args) {
-
+    Stack<T> tmp1(capacity);
+    Stack<T> tmp2(s.capacity);
+    while (!empty()) {
+        tmp1.push(top());
+        pop();
+    }
+    while (!s.empty()) {
+        tmp2.push(s.top());
+        s.pop();
+    }
+    delete[] data;
+    delete[] s.data;
+    data = new(std::nothrow) T[tmp2.capacity];
+    assert(data != nullptr);
+    s.data = new(std::nothrow) T[tmp1.capacity];
+    assert(s.data != nullptr);
+    while (!tmp2.empty()) {
+        push(tmp2.top());
+        tmp2.pop();
+    }
+    while (!tmp1.empty()) {
+        s.push(tmp1.top());
+        tmp1.pop();
+    }
 }
 
