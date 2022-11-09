@@ -9,13 +9,129 @@ class LinkList {
 private:
     class ListNode {
     public:
-        explicit ListNode(T data) {
+        explicit ListNode(const T &data) {
+            this->data = data;
+            next = nullptr;
+        }
+
+        explicit ListNode(T &&data) {
             this->data = data;
             next = nullptr;
         }
 
         T data;
         ListNode *next;
+    };
+
+    class Iterator {
+    private:
+        ListNode *ptr;
+
+    public:
+        explicit Iterator(ListNode *ptr) : ptr(ptr) {}
+
+        explicit Iterator(T data) : ptr(new ListNode(data)) {}
+
+        Iterator(const Iterator &right) : ptr(right.ptr) {}
+
+        T &operator*() {
+            return (*ptr);
+        }
+
+        const Iterator operator++(int) {
+            return Iterator(nullptr);
+        }
+
+        Iterator &operator++() {
+            return <#initializer#>;
+        }
+
+//        const Iterator operator--(int);
+//
+//        Iterator &operator--();
+
+        bool operator==(const Iterator &right) {
+            return ptr == right.ptr;
+        }
+
+        bool operator!=(const Iterator &right) {
+            return ptr != right.ptr;
+        }
+
+        bool operator<(const Iterator &right) {
+            return ptr < right.ptr;
+        }
+
+        bool operator<=(const Iterator &right) {
+            return ptr <= right.ptr;
+        }
+
+        bool operator>(const Iterator &right) {
+            return ptr > right.ptr;
+        }
+
+        bool operator>=(const Iterator &right) {
+            return ptr >= right.ptr;
+        }
+    };
+
+    class ConstIterator {
+    private:
+        const ListNode *ptr;
+
+    public:
+        explicit ConstIterator(ListNode *ptr) : ptr(ptr) {}
+
+        explicit ConstIterator(T data) : ptr(new ListNode(data)) {}
+
+        ConstIterator(const ConstIterator &right) : ptr(right.ptr) {}
+
+        T &operator*() {
+            return (*ptr);
+        }
+
+        const ConstIterator operator++(int) {
+            return ConstIterator(nullptr);
+        }
+
+        ConstIterator &operator++() {
+            if (ptr->next) {
+                ptr = ptr->next;
+            }
+            return (*this);
+        }
+
+//        const ConstIterator operator--(int) {
+//            return ConstIterator(nullptr);
+//        }
+//
+//        ConstIterator &operator--() {
+//            return <#initializer#>;
+//        }
+
+        bool operator==(const ConstIterator &right) {
+            return ptr == right.ptr;
+        }
+
+        bool operator!=(const ConstIterator &right) {
+            return ptr != right.ptr;
+        }
+
+        bool operator<(const ConstIterator &right) {
+            return ptr < right.ptr;
+        }
+
+        bool operator<=(const ConstIterator &right) {
+            return ptr <= right.ptr;
+        }
+
+        bool operator>(const ConstIterator &right) {
+            return ptr > right.ptr;
+        }
+
+        bool operator>=(const ConstIterator &right) {
+            return ptr >= right.ptr;
+        }
     };
 
     ListNode *head;
@@ -34,7 +150,9 @@ public:
 
     int getLength() const;
 
-    void insert(T);
+    void insert(const T &);
+
+    void insert(T &&);
 
     void display(std::ostream &);
 
@@ -91,7 +209,23 @@ int LinkList<T>::getLength() const {
 }
 
 template<typename T>
-void LinkList<T>::insert(T data) {
+void LinkList<T>::insert(const T &data) {
+    auto node = new ListNode(data);
+    assert(node != nullptr);
+    length++;
+    if (empty()) {
+        head = node;
+        return;
+    }
+    auto ptr = head;
+    while (ptr->next != nullptr) {
+        ptr = ptr->next;
+    }
+    ptr->next = node;
+}
+
+template<typename T>
+void LinkList<T>::insert(T &&data) {
     auto node = new ListNode(data);
     assert(node != nullptr);
     length++;

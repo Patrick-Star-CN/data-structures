@@ -14,11 +14,11 @@ public:
 
     T getKey() const;
 
-    void setKey(T key);
+    void setKey(T);
 
     U getValue() const;
 
-    void setValue(U value);
+    void setValue(U);
 };
 
 template<typename T, typename U>
@@ -27,8 +27,8 @@ T Pair<T, U>::getKey() const {
 }
 
 template<typename T, typename U>
-void Pair<T, U>::setKey(T key) {
-    Pair::key = key;
+void Pair<T, U>::setKey(T k) {
+    Pair::key = k;
 }
 
 template<typename T, typename U>
@@ -37,8 +37,8 @@ U Pair<T, U>::getValue() const {
 }
 
 template<typename T, typename U>
-void Pair<T, U>::setValue(U value) {
-    Pair::value = value;
+void Pair<T, U>::setValue(U v) {
+    Pair::value = v;
 }
 
 template<typename T, typename U>
@@ -48,27 +48,37 @@ private:
     private:
         Node *left;
         Node *right;
+        Node *father;
         Pair<T, U> data;
     public:
-        explicit Node(Pair<T, U> data) : data(data), left(nullptr), right(nullptr) {}
+        explicit Node(Pair<T, U> data) : data(data), left(nullptr), right(nullptr), father(nullptr) {}
+
+        explicit Node(Pair<T, U> data, Node *father) : data(data), left(nullptr), right(nullptr), father(father) {}
+
 
         Node(const Node &right) : left(right.left), right(right.right), data(right.data) {}
 
         Node *getLeft() const;
 
-        void setLeft(Node *left);
+        void setLeft(Node *);
 
         bool hasLeft() const;
 
         Node *getRight() const;
 
-        void setRight(Node *right);
+        void setRight(Node *);
 
         bool hasRight() const;
 
+        Node *getFather() const;
+
+        void setFather(Node *);
+
+        bool hasFather() const;
+
         const Pair<T, U> &getData() const;
 
-        void setData(const Pair<T, U> &data);
+        void setData(const Pair<T, U> &);
     };
 
     class Iterator {
@@ -105,11 +115,142 @@ private:
         bool operator>=(const Iterator &);
     };
 
+    class ConstIterator {
+    private:
+        const Node *ptr;
+
+    public:
+        explicit ConstIterator(Node *ptr) : ptr(ptr) {}
+
+        explicit ConstIterator(Pair<T, U> data) : ptr(new Node(data)) {}
+
+        ConstIterator(const ConstIterator &right) : ptr(right.ptr) {}
+
+        Pair<T, U> &operator*();
+
+        const ConstIterator operator++(int);
+
+        ConstIterator &operator++();
+
+        const ConstIterator operator--(int);
+
+        ConstIterator &operator--();
+
+        bool operator==(const ConstIterator &);
+
+        bool operator!=(const ConstIterator &);
+
+        bool operator<(const ConstIterator &);
+
+        bool operator<=(const ConstIterator &);
+
+        bool operator>(const ConstIterator &);
+
+        bool operator>=(const ConstIterator &);
+    };
+
+    unsigned int distance(Iterator, Iterator);
+
     Node *root;
 
 public:
+    Map() : root(nullptr) {}
+
+    Map(const Map<T, U> &right) : root(right.root) {}
+
+    ~Map();
+
+    Iterator begin();
+
+    ConstIterator cBegin();
+
+    Iterator end();
+
+    ConstIterator cEnd();
+
+    Pair<T, U> &at(const T &);
+
+    const Pair<T, U> &at(const T &) const;
+
+    unsigned int size();
+
 
 };
+
+template<typename T, typename U>
+Pair<T, U> &Map<T, U>::ConstIterator::operator*() {
+    return ptr->getData();
+}
+
+template<typename T, typename U>
+const typename Map<T, U>::ConstIterator Map<T, U>::ConstIterator::operator++(int) {
+    Map<T, U>::ConstIterator tmp(*this);
+    ++(*this);
+    return tmp;
+}
+
+template<typename T, typename U>
+typename Map<T, U>::ConstIterator &Map<T, U>::ConstIterator::operator++() {
+    if (ptr->hasRight()) {
+        ptr = ptr->getRight();
+        while (ptr->hasLeft()) {
+            ptr = ptr->getLeft();
+        }
+    } else if (ptr->hasFather() && ptr->getFather()->hasLeft() == this) {
+        ptr = ptr->getFather();
+    }
+    return (*this);
+}
+
+template<typename T, typename U>
+const typename Map<T, U>::ConstIterator Map<T, U>::ConstIterator::operator--(int) {
+    Map<T, U>::ConstIterator tmp(*this);
+    --(*this);
+    return tmp;
+}
+
+template<typename T, typename U>
+typename Map<T, U>::ConstIterator &Map<T, U>::ConstIterator::operator--() {
+    if (ptr->hasLeft()) {
+        ptr = ptr->getLeft();
+        while (ptr->hasRight()) {
+            ptr = ptr->getRight();
+        }
+    } else if (ptr->hasFather() && ptr->getFather()->hasRight() == this) {
+        ptr = ptr->getFather();
+    }
+    return (*this);
+}
+
+template<typename T, typename U>
+bool Map<T, U>::ConstIterator::operator==(const Map::ConstIterator &right) {
+    return ptr->getData().getKey() == right.ptr->getData().getKey();
+}
+
+template<typename T, typename U>
+bool Map<T, U>::ConstIterator::operator!=(const Map::ConstIterator &right) {
+    return ptr->getData().getKey() != right.ptr->getData().getKey();
+}
+
+template<typename T, typename U>
+bool Map<T, U>::ConstIterator::operator<(const Map::ConstIterator &right) {
+    return ptr->getData().getKey() < right.ptr->getData().getKey();
+}
+
+template<typename T, typename U>
+bool Map<T, U>::ConstIterator::operator<=(const Map::ConstIterator &right) {
+    return ptr->getData().getKey() <= right.ptr->getData().getKey();
+}
+
+template<typename T, typename U>
+bool Map<T, U>::ConstIterator::operator>(const Map::ConstIterator &right) {
+    return ptr->getData().getKey() > right.ptr->getData().getKey();
+}
+
+template<typename T, typename U>
+bool Map<T, U>::ConstIterator::operator>=(const Map::ConstIterator &right) {
+    return ptr->getData().getKey() >= right.ptr->getData().getKey();
+}
 
 template<typename T, typename U>
 Pair<T, U> &Map<T, U>::Iterator::operator*() {
@@ -130,6 +271,8 @@ typename Map<T, U>::Iterator &Map<T, U>::Iterator::operator++() {
         while (ptr->hasLeft()) {
             ptr = ptr->getLeft();
         }
+    } else if (ptr->hasFather() && ptr->getFather()->hasLeft() == this) {
+        ptr = ptr->getFather();
     }
     return (*this);
 }
@@ -148,6 +291,8 @@ typename Map<T, U>::Iterator &Map<T, U>::Iterator::operator--() {
         while (ptr->hasRight()) {
             ptr = ptr->getRight();
         }
+    } else if (ptr->hasFather() && ptr->getFather()->hasRight() == this) {
+        ptr = ptr->getFather();
     }
     return (*this);
 }
@@ -188,8 +333,8 @@ typename Map<T, U>::Node *Map<T, U>::Node::getLeft() const {
 }
 
 template<typename T, typename U>
-void Map<T, U>::Node::setLeft(Map::Node *left) {
-    Node::left = left;
+void Map<T, U>::Node::setLeft(Map::Node *l) {
+    Node::left = l;
 }
 
 template<typename T, typename U>
@@ -198,8 +343,8 @@ typename Map<T, U>::Node *Map<T, U>::Node::getRight() const {
 }
 
 template<typename T, typename U>
-void Map<T, U>::Node::setRight(Map::Node *right) {
-    Node::right = right;
+void Map<T, U>::Node::setRight(Map::Node *r) {
+    Node::right = r;
 }
 
 template<typename T, typename U>
@@ -208,8 +353,8 @@ const Pair<T, U> &Map<T, U>::Node::getData() const {
 }
 
 template<typename T, typename U>
-void Map<T, U>::Node::setData(const Pair<T, U> &data) {
-    Node::data = data;
+void Map<T, U>::Node::setData(const Pair<T, U> &d) {
+    Node::data = d;
 }
 
 template<typename T, typename U>
@@ -220,6 +365,21 @@ bool Map<T, U>::Node::hasLeft() const {
 template<typename T, typename U>
 bool Map<T, U>::Node::hasRight() const {
     return right != nullptr;
+}
+
+template<typename T, typename U>
+typename Map<T, U>::Node *Map<T, U>::Node::getFather() const {
+    return father;
+}
+
+template<typename T, typename U>
+void Map<T, U>::Node::setFather(Map::Node *f) {
+    Node::father = f;
+}
+
+template<typename T, typename U>
+bool Map<T, U>::Node::hasFather() const {
+    return father != nullptr;
 }
 
 #endif //DATA_STRUCTURES_MAP_H
