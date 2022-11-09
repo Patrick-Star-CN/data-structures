@@ -7,6 +7,17 @@
 template<typename T>
 class Deque {
 private:
+
+
+    T *data;
+    unsigned int capacity;
+    unsigned int size;
+    unsigned int first;
+    unsigned int last;
+
+    void zoom();
+
+public:
     class Iterator {
     private:
         T *first;
@@ -43,19 +54,6 @@ private:
         T &operator*();
     };
 
-    T *data;
-    unsigned int capacity;
-    unsigned int size;
-    unsigned int first;
-    unsigned int last;
-
-    void zoom();
-
-public:
-    Iterator begin();
-
-    Iterator end();
-
     Deque() : data(nullptr), first(0), last(0), capacity(0), size(0) {}
 
     explicit Deque(unsigned int capacity) : first(0), last(0), capacity(capacity), size(0) {
@@ -67,6 +65,10 @@ public:
         delete[] data;
         data = nullptr;
     }
+
+    Iterator begin();
+
+    Iterator end();
 
     void pushBack(const T &);
 

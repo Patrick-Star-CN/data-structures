@@ -6,28 +6,17 @@ class BaseIterator {
 public:
     virtual constexpr BaseIterator<T> operator++(int) = 0;
 
-protected:
-    T *now;
+    virtual BaseIterator<T> &operator++() = 0;
+
+    virtual T &operator*() = 0;
 };
 
 template<typename T>
-class InputIterator : public BaseIterator<T> {
-public:
-    template<typename U>
-    friend U operator*(const InputIterator<U> &);
-};
-
-template<typename T>
-class ForwardIterator : public BaseIterator<T> {
-public:
-    template<typename U>
-    friend U &operator*(const InputIterator<U> &);
-};
-
-template<typename T>
-class BidirectionalIterator : public ForwardIterator<T> {
+class BidirectionalIterator : public BaseIterator<T> {
 public:
     virtual constexpr BaseIterator<T> operator--(int) = 0;
+
+    virtual BaseIterator<T> &operator--() = 0;
 };
 
 template<typename T>
@@ -35,12 +24,11 @@ class RandomAccessIterator : public BidirectionalIterator<T> {
 public:
     virtual constexpr BaseIterator<T> operator+(int) = 0;
 
+    virtual BaseIterator<T> &operator+=(int) = 0;
+
     virtual constexpr BaseIterator<T> operator-(int) = 0;
+
+    virtual BaseIterator<T> &operator-=(int) = 0;
 };
 
 #endif //DATA_STRUCTURES_ITERATOR_H
-
-template<typename U>
-U operator*(const InputIterator<U> &right) {
-    return *(right.now);
-}
