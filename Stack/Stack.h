@@ -178,4 +178,3 @@ void Stack<T>::swap(Stack<T> &s) {
         tmp1.pop();
     }
 }
-

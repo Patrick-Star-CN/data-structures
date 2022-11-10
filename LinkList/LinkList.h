@@ -71,6 +71,10 @@ public:
             return (ptr->getData());
         }
 
+        T *operator->() {
+            return &(ptr->getData());
+        }
+
         operator ListNode *() {
             return ptr;
         }
@@ -162,8 +166,12 @@ public:
 
         ConstIterator(const ConstIterator &right) : ptr(right.ptr) {}
 
-        T &operator*() {
+        const T operator*() const {
             return (ptr->getData());
+        }
+
+        const T *operator->() const {
+            return &(ptr->getData());
         }
 
         constexpr ConstIterator operator++(int) {
@@ -372,13 +380,14 @@ template<typename T>
 LinkList<T>::LinkList(const LinkList<T> &ori) {
     LinkList::ConstIterator it = ori.cBegin();
     auto node = new ListNode(*it);
+    assert(node != nullptr);
     head = node;
     ++it;
     LinkList::Iterator it_ = begin();
     while (it != ori.cEnd()) {
         node = new ListNode(*it);
         assert(node != nullptr);
-        (*it_).setNext(node);
+        ((LinkList<T>::ListNode *)(it_))->setNext(node);
         node->setPrior(it_);
         ++it;
         ++it_;
@@ -390,13 +399,14 @@ template<typename T>
 LinkList<T> &LinkList<T>::operator=(const LinkList &ori) {
     LinkList::ConstIterator it = ori.cBegin();
     auto node = new ListNode(*it);
+    assert(node != nullptr);
     head = node;
     ++it;
     LinkList::Iterator it_ = begin();
     while (it != ori.cEnd()) {
         node = new ListNode(*it);
         assert(node != nullptr);
-        (*it_).setNext(node);
+        ((LinkList<T>::ListNode *)(it_))->setNext(node);
         node->setPrior(it_);
         ++it;
         ++it_;

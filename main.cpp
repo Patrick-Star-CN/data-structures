@@ -26,14 +26,23 @@ public:
     void setXs(double xs) {
         Term::xs = xs;
     }
+
+    bool operator==(const Term &rhs) const {
+        return zs == rhs.zs &&
+               xs == rhs.xs;
+    }
+
+    bool operator!=(const Term &rhs) const {
+        return !(rhs == *this);
+    }
 };
 
 LinkList<Term> der(LinkList<Term> &ori) {
     LinkList<Term> list;
     LinkList<Term>::Iterator it = ori.begin();
     for (; it != ori.end(); ++it) {
-        if ((*it).getZs()) {
-            list.pushBack(Term((*it).getZs() - 1, (*it).getZs() * (*it).getXs()));
+        if (it->getZs()) {
+            list.pushBack(Term(it->getZs() - 1, it->getZs() * it->getXs()));
         }
     }
     return list;
@@ -42,21 +51,23 @@ LinkList<Term> der(LinkList<Term> &ori) {
 LinkList<Term> mul(LinkList<Term> &left, LinkList<Term> &right) {
     LinkList<Term> list;
     LinkList<Term>::Iterator it = left.begin();
-    LinkList<Term>::Iterator iter = right.begin();
     for (; it != left.end(); ++it) {
-        for (; iter != right.end(); ++iter) {
-            int zs = (*it).getZs() + (*iter).getZs();
-            double xs = (*it).getXs() * (*iter).getXs();
+        for (LinkList<Term>::Iterator iter = right.begin(); iter != right.end(); ++iter) {
+            int zs = it->getZs() + iter->getZs();
+            double xs = it->getXs() * iter->getXs();
             LinkList<Term>::Iterator it_ = list.begin();
             for (; it_ != list.end(); ++it_) {
-                if ((*it_).getZs() >= zs) {
+                if (it_->getZs() >= zs) {
                     break;
                 }
             }
             if (it_ == list.end()) {
                 list.pushBack(Term(zs, xs));
-            } else if ((*it_).getZs() == zs) {
-                (*it_) = Term(zs, (*it_).getXs() + xs);
+            } else if (it_->getZs() == zs) {
+                (*it_) = Term(zs, it_->getXs() + xs);
+                if (it_->getXs() == 0) {
+                    list.erase(Term(zs, 0));
+                }
             } else {
                 list.insert(it, Term(zs, xs));
             }
@@ -70,24 +81,29 @@ LinkList<Term> add(LinkList<Term> left, LinkList<Term> &right) {
     LinkList<Term>::Iterator it = left.begin();
     LinkList<Term>::Iterator iter = right.begin();
     while (it != left.end() && iter != right.end()) {
-        if ((*it).getZs() == (*iter).getZs()) {
-            list.pushBack(Term((*it).getZs(), (*it).getXs() + (*iter).getXs()));
+        if (it->getZs() == iter->getZs()) {
+            if (it->getXs() + iter->getXs() == 0) {
+                ++it;
+                ++iter;
+                continue;
+            }
+            list.pushBack(Term(it->getZs(), it->getXs() + iter->getXs()));
             ++it;
             ++iter;
-        } else if ((*it).getZs() > (*iter).getZs()) {
-            list.pushBack(Term((*iter).getZs(), (*iter).getXs()));
+        } else if (it->getZs() > iter->getZs()) {
+            list.pushBack(Term(iter->getZs(), iter->getXs()));
             ++iter;
         } else {
-            list.pushBack(Term((*it).getZs(), (*it).getXs()));
+            list.pushBack(Term(it->getZs(), it->getXs()));
             ++it;
         }
     }
     while (it != left.end()) {
-        list.pushBack(Term((*it).getZs(), (*it).getXs()));
+        list.pushBack(Term(it->getZs(), it->getXs()));
         ++it;
     }
     while (iter != right.end()) {
-        list.pushBack(Term((*iter).getZs(), (*iter).getXs()));
+        list.pushBack(Term(iter->getZs(), iter->getXs()));
         ++iter;
     }
     return list;
@@ -95,10 +111,18 @@ LinkList<Term> add(LinkList<Term> left, LinkList<Term> &right) {
 
 void display(ostream &out, LinkList<Term> v) {
     LinkList<Term>::Iterator it = v.begin();
-    out << (*it).getXs() << "x^" << (*it).getZs() << " ";
+    if (it == v.end()) {
+        out << "0" << endl;
+        return;
+    }
+    out << it->getXs();
+    if (it->getZs()) {
+        out << "x^" << it->getZs();
+    }
+    out << " ";
     ++it;
     for (; it != v.end(); ++it) {
-        out << showpos << (*it).getXs() << noshowpos << "x^" << (*it).getZs() << " ";
+        out << showpos << it->getXs() << noshowpos << "x^" << it->getZs() << " ";
     }
     out << endl;
 }
