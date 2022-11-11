@@ -66,7 +66,7 @@ LinkList<Term> mul(LinkList<Term> &left, LinkList<Term> &right) {
             } else if (it_->getZs() == zs) {
                 (*it_) = Term(zs, it_->getXs() + xs);
                 if (it_->getXs() == 0) {
-                    list.erase(Term(zs, 0));
+                    list.erase(it_);
                 }
             } else {
                 list.insert(it, Term(zs, xs));
@@ -142,8 +142,13 @@ int main() {
     while (cin >> x >> z && (z || x != 0)) {
         list2.pushBack(Term(z, x));
     }
+    cout << "P + Q\t=";
     display(cout, add(list1, list2));
+    cout << "P'\t\t=";
     display(cout, der(list1));
+    cout << "Q'\t\t=";
+    display(cout, der(list2));
+    cout << "P * Q\t=";
     display(cout, mul(list1, list2));
     return 0;
 }
