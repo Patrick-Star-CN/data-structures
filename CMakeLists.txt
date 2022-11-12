@@ -4,5 +4,6 @@ project(data_structures)
 set(CMAKE_CXX_STANDARD 14)
 
 add_executable(data_structures
-        LinkList/LinkList.h
-        main.cpp)
+        main.cpp
+        Map/Map.h
+        LinkList/LinkList.h)

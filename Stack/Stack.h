@@ -37,7 +37,7 @@ public:
     // 从栈顶弹出一个元素
     void pop();
 
-    void swap(Stack<T> &s);
+    void swap(Stack<T> &);
 
 private:
     T *data;
@@ -60,25 +60,28 @@ Stack<T>::Stack(unsigned int capacity):capacity(capacity), size(0) {
 }
 
 template<typename T>
-Stack<T>::Stack(const Stack<T> &right) {
-    capacity = right.capacity;
-    size = right.size;
+Stack<T>::Stack(const Stack<T> &ori) {
+    capacity = ori.capacity;
+    size = ori.size;
     data = new(std::nothrow) T[capacity];
     assert(data != nullptr);
     for (int i = 0; i < size; i++) {
-        data[i] = right.data[i];
+        data[i] = ori.data[i];
     }
 }
 
 template<typename T>
-Stack<T> &Stack<T>::operator=(const Stack<T> &right) {
-    capacity = right.capacity;
-    size = right.size;
+Stack<T> &Stack<T>::operator=(const Stack<T> &ori) {
+    if (this == &ori) {
+        return (*this);
+    }
+    capacity = ori.capacity;
+    size = ori.size;
     delete[] data;
     data = new(std::nothrow) T[capacity];
     assert(data != nullptr);
     for (int i = 0; i < size; i++) {
-        data[i] = right.data[i];
+        data[i] = ori.data[i];
     }
     return *this;
 }
@@ -139,42 +142,42 @@ void Stack<T>::push(T &&v) {
 }
 
 template<typename T>
-Stack<T> &Stack<T>::operator=(Stack<T> &&right) noexcept {
-    capacity = right.capacity;
-    size = right.size;
+Stack<T> &Stack<T>::operator=(Stack<T> &&rhs) noexcept {
+    capacity = rhs.capacity;
+    size = rhs.size;
     delete[] data;
     data = new(std::nothrow) T[capacity];
     assert(data != nullptr);
     for (int i = 0; i < size; i++) {
-        data[i] = right.data[i];
+        data[i] = rhs.data[i];
     }
     return *this;
 }
 
 template<typename T>
-void Stack<T>::swap(Stack<T> &s) {
+void Stack<T>::swap(Stack<T> &other) {
     Stack<T> tmp1(capacity);
-    Stack<T> tmp2(s.capacity);
+    Stack<T> tmp2(other.capacity);
     while (!empty()) {
         tmp1.push(top());
         pop();
     }
-    while (!s.empty()) {
-        tmp2.push(s.top());
-        s.pop();
+    while (!other.empty()) {
+        tmp2.push(other.top());
+        other.pop();
     }
     delete[] data;
-    delete[] s.data;
+    delete[] other.data;
     data = new(std::nothrow) T[tmp2.capacity];
     assert(data != nullptr);
-    s.data = new(std::nothrow) T[tmp1.capacity];
-    assert(s.data != nullptr);
+    other.data = new(std::nothrow) T[tmp1.capacity];
+    assert(other.data != nullptr);
     while (!tmp2.empty()) {
         push(tmp2.top());
         tmp2.pop();
     }
     while (!tmp1.empty()) {
-        s.push(tmp1.top());
+        other.push(tmp1.top());
         tmp1.pop();
     }
 }

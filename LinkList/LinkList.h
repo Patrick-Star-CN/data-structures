@@ -9,14 +9,14 @@ class LinkList {
 private:
     class ListNode {
     public:
-        explicit ListNode(const T &data) {
-            this->data = data;
+        explicit ListNode(const T &v) {
+            data = v;
             next = nullptr;
             prior = nullptr;
         }
 
-        explicit ListNode(T &&data) {
-            this->data = data;
+        explicit ListNode(T &&v) {
+            data = v;
             next = nullptr;
             prior = nullptr;
         }
@@ -63,9 +63,9 @@ public:
     public:
         explicit ConstIterator(ListNode *ptr) : ptr(ptr) {}
 
-        explicit ConstIterator(T data) : ptr(new ListNode(data)) {}
+        explicit ConstIterator(T v) : ptr(new ListNode(v)) {}
 
-        ConstIterator(const ConstIterator &right) : ptr(right.ptr) {}
+        ConstIterator(const ConstIterator &ori) : ptr(ori.ptr) {}
 
         const T operator*() const {
             return (ptr->getData());
@@ -76,6 +76,9 @@ public:
         }
 
         ConstIterator &operator=(const ConstIterator &ori) {
+            if (this == &ori) {
+                return (*this);
+            }
             ptr = ori.ptr;
             return (*this);
         }
@@ -102,28 +105,28 @@ public:
             return (*this);
         }
 
-        bool operator==(const ConstIterator &right) {
-            return ptr == right.ptr;
+        bool operator==(const ConstIterator &rhs) {
+            return ptr == rhs.ptr;
         }
 
-        bool operator!=(const ConstIterator &right) {
-            return ptr != right.ptr;
+        bool operator!=(const ConstIterator &rhs) {
+            return ptr != rhs.ptr;
         }
 
-        bool operator<(const ConstIterator &right) {
-            return ptr < right.ptr;
+        bool operator<(const ConstIterator &rhs) {
+            return ptr < rhs.ptr;
         }
 
-        bool operator<=(const ConstIterator &right) {
-            return ptr <= right.ptr;
+        bool operator<=(const ConstIterator &rhs) {
+            return ptr <= rhs.ptr;
         }
 
-        bool operator>(const ConstIterator &right) {
-            return ptr > right.ptr;
+        bool operator>(const ConstIterator &rhs) {
+            return ptr > rhs.ptr;
         }
 
-        bool operator>=(const ConstIterator &right) {
-            return ptr >= right.ptr;
+        bool operator>=(const ConstIterator &rhs) {
+            return ptr >= rhs.ptr;
         }
     };
 
@@ -134,9 +137,9 @@ public:
     public:
         explicit Iterator(ListNode *ptr) : ptr(ptr) {}
 
-        explicit Iterator(T data) : ptr(new ListNode(data)) {}
+        explicit Iterator(T v) : ptr(new ListNode(v)) {}
 
-        Iterator(const Iterator &right) : ptr(right.ptr) {}
+        Iterator(const Iterator &ori) : ptr(ori.ptr) {}
 
         T &operator*() {
             return (ptr->getData());
@@ -146,15 +149,18 @@ public:
             return &(ptr->getData());
         }
 
-        operator ListNode *() {
+        explicit operator ListNode *() {
             return ptr;
         }
 
-        operator ConstIterator() {
+        explicit operator ConstIterator() {
             return ConstIterator(ptr);
         }
 
         Iterator &operator=(const Iterator &ori) {
+            if (this == &ori) {
+                return (*this);
+            }
             ptr = ori.ptr;
             return (*this);
         }
@@ -170,19 +176,19 @@ public:
             return (*this);
         }
 
-        constexpr Iterator operator+(int right) {
+        constexpr Iterator operator+(int rhs) {
             Iterator tmp(*this);
-            tmp += right;
+            tmp += rhs;
             return tmp;
         }
 
-        Iterator &operator+=(int right) {
-            if (right >= 0) {
-                for (int i = 0; i < right && ptr; ++i) {
+        Iterator &operator+=(int rhs) {
+            if (rhs >= 0) {
+                for (int i = 0; i < rhs && ptr; ++i) {
                     ptr = ptr->getNext();
                 }
             } else {
-                for (int i = 0; i > right && ptr; --i) {
+                for (int i = 0; i > rhs && ptr; --i) {
                     ptr = ptr->getPrior();
                 }
             }
@@ -200,38 +206,38 @@ public:
             return (*this);
         }
 
-        constexpr Iterator operator-(int right) {
+        constexpr Iterator operator-(int rhs) {
             Iterator tmp(*this);
-            tmp -= right;
+            tmp -= rhs;
             return tmp;
         }
 
-        Iterator &operator-=(int right) {
-            return (*this) += (-right);
+        Iterator &operator-=(int rhs) {
+            return (*this) += (-rhs);
         }
 
-        bool operator==(const Iterator &right) {
-            return ptr == right.ptr;
+        bool operator==(const Iterator &rhs) {
+            return ptr == rhs.ptr;
         }
 
-        bool operator!=(const Iterator &right) {
-            return ptr != right.ptr;
+        bool operator!=(const Iterator &rhs) {
+            return ptr != rhs.ptr;
         }
 
-        bool operator<(const Iterator &right) {
-            return ptr < right.ptr;
+        bool operator<(const Iterator &rhs) {
+            return ptr < rhs.ptr;
         }
 
-        bool operator<=(const Iterator &right) {
-            return ptr <= right.ptr;
+        bool operator<=(const Iterator &rhs) {
+            return ptr <= rhs.ptr;
         }
 
-        bool operator>(const Iterator &right) {
-            return ptr > right.ptr;
+        bool operator>(const Iterator &rhs) {
+            return ptr > rhs.ptr;
         }
 
-        bool operator>=(const Iterator &right) {
-            return ptr >= right.ptr;
+        bool operator>=(const Iterator &rhs) {
+            return ptr >= rhs.ptr;
         }
     };
 
@@ -312,8 +318,8 @@ LinkList<T>::LinkList() {
 }
 
 template<typename T>
-LinkList<T>::LinkList(T data) {
-    auto node = new ListNode(data);
+LinkList<T>::LinkList(T v) {
+    auto node = new ListNode(v);
     assert(node != nullptr);
     head = node;
     tail = node;
@@ -341,27 +347,31 @@ LinkList<T>::LinkList(const LinkList<T> &ori) {
 
 template<typename T>
 LinkList<T> &LinkList<T>::operator=(const LinkList &ori) {
+    if (this == &ori) {
+        return (*this);
+    }
+    clear();
     assign(ori);
     return (*this);
 }
 
 template<typename T>
-bool LinkList<T>::operator==(const LinkList &right) const {
-    if (size() != right.size()) {
+bool LinkList<T>::operator==(const LinkList &rhs) const {
+    if (size() != rhs.size()) {
         return false;
     }
     LinkList::Iterator it1 = begin();
-    LinkList::Iterator it2 = right.begin();
-    while (it1 != end() && it2 != right.end() && (*it1) == (*it2)) {
+    LinkList::Iterator it2 = rhs.begin();
+    while (it1 != end() && it2 != rhs.end() && (*it1) == (*it2)) {
         ++it1;
         ++it2;
     }
-    return it1 != end() && it2 != right.end();
+    return it1 != end() && it2 != rhs.end();
 }
 
 template<typename T>
-bool LinkList<T>::operator!=(const LinkList &right) const {
-    return right != *this;
+bool LinkList<T>::operator!=(const LinkList &rhs) const {
+    return rhs != *this;
 }
 
 template<typename T>
@@ -385,8 +395,8 @@ typename LinkList<T>::ConstIterator LinkList<T>::cEnd() const {
 }
 
 template<typename T>
-void LinkList<T>::pushBack(const T &data) {
-    auto node = new ListNode(data);
+void LinkList<T>::pushBack(const T &v) {
+    auto node = new ListNode(v);
     assert(node != nullptr);
     if (empty()) {
         head = node;
@@ -399,8 +409,8 @@ void LinkList<T>::pushBack(const T &data) {
 }
 
 template<typename T>
-void LinkList<T>::pushBack(T &&data) {
-    auto node = new ListNode(data);
+void LinkList<T>::pushBack(T &&v) {
+    auto node = new ListNode(v);
     assert(node != nullptr);
     if (empty()) {
         head = node;
@@ -413,8 +423,8 @@ void LinkList<T>::pushBack(T &&data) {
 }
 
 template<typename T>
-void LinkList<T>::pushFront(const T &data) {
-    auto node = new ListNode(data);
+void LinkList<T>::pushFront(const T &v) {
+    auto node = new ListNode(v);
     if (empty()) {
         head = node;
         tail = node;
@@ -426,8 +436,8 @@ void LinkList<T>::pushFront(const T &data) {
 }
 
 template<typename T>
-void LinkList<T>::pushFront(T &&data) {
-    auto node = new ListNode(data);
+void LinkList<T>::pushFront(T &&v) {
+    auto node = new ListNode(v);
     if (empty()) {
         head = node;
         tail = node;
@@ -455,15 +465,15 @@ void LinkList<T>::popFront() {
 }
 
 template<typename T>
-typename LinkList<T>::Iterator LinkList<T>::insert(LinkList::Iterator pos, const T &data) {
+typename LinkList<T>::Iterator LinkList<T>::insert(LinkList::Iterator pos, const T &v) {
     if (pos == end()) {
-        pushBack(data);
+        pushBack(v);
         return Iterator(head);
     } else if (pos == begin()) {
-        pushFront(data);
+        pushFront(v);
         return Iterator(tail);
     }
-    auto node = new ListNode(data);
+    auto node = new ListNode(v);
     ((LinkList<T>::ListNode *) (pos - 1))->setNext(node);
     node->setPrior(pos - 1);
     ((LinkList<T>::ListNode *) (pos))->setPrior(node);
@@ -472,43 +482,43 @@ typename LinkList<T>::Iterator LinkList<T>::insert(LinkList::Iterator pos, const
 }
 
 template<typename T>
-typename LinkList<T>::Iterator LinkList<T>::insert(LinkList::Iterator pos, T &&data) {
+typename LinkList<T>::Iterator LinkList<T>::insert(LinkList::Iterator pos, T &&v) {
     if (pos == end()) {
-        pushBack(data);
+        pushBack(v);
         return Iterator(head);
     } else if (pos == begin()) {
-        pushFront(data);
+        pushFront(v);
         return Iterator(tail);
     }
-    auto node = new ListNode(data);
+    auto node = new ListNode(v);
     ((LinkList<T>::ListNode *) (pos - 1))->setNext(node);
-    node->setPrior(pos - 1);
+    node->setPrior(((LinkList<T>::ListNode *) (pos - 1)));
     ((LinkList<T>::ListNode *) (pos))->setPrior(node);
-    node->setNext(pos);
+    node->setNext(((LinkList<T>::ListNode *) (pos)));
     return Iterator(node);
 }
 
 template<typename T>
-typename LinkList<T>::Iterator LinkList<T>::insert(LinkList::Iterator pos, unsigned int count, const T &data) {
+typename LinkList<T>::Iterator LinkList<T>::insert(LinkList::Iterator pos, unsigned int count, const T &v) {
     if (count == 0) {
         return pos;
     } else if (pos == begin()) {
         for (int i = 0; i < count; ++i) {
-            pushFront(data);
+            pushFront(v);
         }
         return Iterator(head);
     } else if (pos == end()) {
         for (int i = 0; i < count; ++i) {
-            pushBack(data);
+            pushBack(v);
         }
         return Iterator(tail);
     }
-    auto node = new ListNode(data);
+    auto node = new ListNode(v);
     auto res = node;
     ((LinkList<T>::ListNode *) (pos - 1))->setNext(node);
     node->setPrior(pos - 1);
     for (int i = 0; i < count; ++i) {
-        auto node_ = new ListNode(data);
+        auto node_ = new ListNode(v);
         node->setNext(node_);
         node_->setPrior(node);
         node = node_;
@@ -551,18 +561,18 @@ LinkList<T>::insert(LinkList::Iterator pos, LinkList::Iterator first, LinkList::
 
 template<typename T>
 typename LinkList<T>::Iterator LinkList<T>::erase(LinkList::Iterator pos) {
-    if (pos == head) {
+    if (((LinkList<T>::ListNode *) (pos)) == head) {
         popFront();
         return Iterator(head);
-    } else if (pos == tail) {
+    } else if (((LinkList<T>::ListNode *) (pos)) == tail) {
         popBack();
         return end();
     }
-    LinkList::ListNode *prior = pos - 1;
-    LinkList::ListNode *next = pos + 1;
+    LinkList::ListNode *prior = ((LinkList<T>::ListNode *) (pos - 1));
+    LinkList::ListNode *next = ((LinkList<T>::ListNode *) (pos + 1));
     prior->setNext(next);
     next->setPrior(prior);
-    delete pos;
+    delete ((LinkList<T>::ListNode *) (pos));
     return Iterator(next);
 }
 
@@ -599,9 +609,9 @@ typename LinkList<T>::Iterator LinkList<T>::erase(LinkList::Iterator first, Link
 }
 
 template<typename T>
-unsigned int LinkList<T>::distance(const LinkList::Iterator &begin, const LinkList::Iterator &end) {
+unsigned int LinkList<T>::distance(const LinkList::Iterator &first, const LinkList::Iterator &last) {
     unsigned int sum = 0;
-    for (LinkList::Iterator it = begin; it != end; ++it, ++sum);
+    for (LinkList::Iterator it = first; it != last; ++it, ++sum);
     return sum;
 }
 
@@ -620,7 +630,7 @@ void LinkList<T>::assign(const LinkList<T> &ori) {
         node = new ListNode(*it);
         assert(node != nullptr);
         ((LinkList<T>::ListNode *) (it_))->setNext(node);
-        node->setPrior(it_);
+        node->setPrior(((LinkList<T>::ListNode *) (it_)));
         ++it;
         ++it_;
     }
@@ -642,4 +652,3 @@ void LinkList<T>::clear() {
     head = nullptr;
     tail = nullptr;
 }
-

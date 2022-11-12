@@ -10,36 +10,24 @@ private:
 public:
     explicit Pair(T k, U v) : key(k), value(v) {}
 
-    Pair(const Pair<T, U> &right) : key(right.key), value(right.value) {}
+    Pair(const Pair<T, U> &ori) : key(ori.key), value(ori.value) {}
 
-    T getKey() const;
+    T getKey() const {
+        return key;
+    }
 
-    void setKey(T);
+    void setKey(T k) {
+        key = k;
+    }
 
-    U getValue() const;
+    U getValue() const {
+        return value;
+    }
 
-    void setValue(U);
+    void setValue(U v) {
+        value = v;
+    }
 };
-
-template<typename T, typename U>
-T Pair<T, U>::getKey() const {
-    return key;
-}
-
-template<typename T, typename U>
-void Pair<T, U>::setKey(T k) {
-    Pair::key = k;
-}
-
-template<typename T, typename U>
-U Pair<T, U>::getValue() const {
-    return value;
-}
-
-template<typename T, typename U>
-void Pair<T, U>::setValue(U v) {
-    Pair::value = v;
-}
 
 template<typename T, typename U>
 class Map {
@@ -55,30 +43,98 @@ private:
 
         explicit Node(Pair<T, U> data, Node *father) : data(data), left(nullptr), right(nullptr), father(father) {}
 
+        Node(const Node &ori) : left(ori.left), right(ori.right), data(ori.data) {}
 
-        Node(const Node &right) : left(right.left), right(right.right), data(right.data) {}
+        Node *getLeft() const {
+            return left;
+        }
 
-        Node *getLeft() const;
+        void setLeft(Node *l) {
+            Node::left = l;
+        }
 
-        void setLeft(Node *);
+        bool hasLeft() const {
+            return left != nullptr;
+        }
 
-        bool hasLeft() const;
+        Node *getRight() const {
+            return right;
+        }
 
-        Node *getRight() const;
+        void setRight(Node *r) {
+            Node::right = r;
+        }
 
-        void setRight(Node *);
+        bool hasRight() const {
+            return right != nullptr;
+        }
 
-        bool hasRight() const;
+        const Pair<T, U> &getData() const {
+            return data;
+        }
 
-        Node *getFather() const;
+        void setData(const Pair<T, U> &d) {
+            Node::data = d;
+        }
 
-        void setFather(Node *);
+        Node *getFather() const {
+            return father;
+        }
 
-        bool hasFather() const;
+        void setFather(Node *f) {
+            Node::father = f;
+        }
 
-        const Pair<T, U> &getData() const;
+        bool hasFather() const {
+            return father != nullptr;
+        }
 
-        void setData(const Pair<T, U> &);
+        int treeIsLeftChild(Node *x) {
+            if (!x->hasFather()) {
+                return -1;
+            }
+            return x == x->getFather()->getLeft();
+        }
+
+        Node *treeMin(Node *root) {
+            while (root->hasLeft()) {
+                root = root->getLeft();
+            }
+            return root;
+        }
+
+        Node *treeMax(Node *root) {
+            while (root->hasRight()) {
+                root = root->getRight();
+            }
+            return root;
+        }
+
+        Node *treeNext(Node *x) {
+            if (x->hasRight()) {
+                return treeMin(x->getRight());
+            }
+            while (treeIsLeftChild(x) == 0) {
+                x = x->getFather();
+            }
+            if (treeIsLeftChild(x) == -1) {
+                return nullptr;
+            }
+            return x->getFather();
+        }
+
+        Node *treePrev(Node *x) {
+            if (x->hasLeft()) {
+                return treeMax(x->getLeft());
+            }
+            while (treeIsLeftChild(x) == 1) {
+                x = x->getFather();
+            }
+            if (treeIsLeftChild(x) == -1) {
+                return nullptr;
+            }
+            return x->getFather();
+        }
     };
 
     class Iterator {
@@ -90,29 +146,69 @@ private:
 
         explicit Iterator(Pair<T, U> data) : ptr(new Node(data)) {}
 
-        Iterator(const Iterator &right) : ptr(right.ptr) {}
+        Iterator(const Iterator &ori) : ptr(ori.ptr) {}
 
-        Pair<T, U> &operator*();
+        Iterator &operator=(const Iterator &ori) {
+            if (&ori == this) {
+                return (*this);
+            }
+            ptr = ori.ptr;
+            return (*this);
+        }
 
-        const Iterator operator++(int);
+        Pair<T, U> &operator*() {
+            return ptr->getData();
+        }
 
-        Iterator &operator++();
+        Pair<T, U> *operator->() {
+            return &(ptr->getData());
+        }
 
-        const Iterator operator--(int);
+        constexpr Iterator operator++(int) {
+            Iterator tmp(*this);
+            ++(*this);
+            return tmp;
+        }
 
-        Iterator &operator--();
+        Iterator &operator++() {
+            ptr = Node::treeNext(ptr);
+            return (*this);
+        }
 
-        bool operator==(const Iterator &);
+        constexpr Iterator operator--(int) {
+            Iterator tmp(*this);
+            --(*this);
+            return tmp;
+        }
 
-        bool operator!=(const Iterator &);
+        Iterator &operator--() {
+            ptr = Node::treePrev(ptr);
+            return (*this);
+        }
 
-        bool operator<(const Iterator &);
+        bool operator==(const Iterator &rhs) {
+            return ptr->getData().getKey() == rhs.ptr->getData().getKey();
+        }
 
-        bool operator<=(const Iterator &);
+        bool operator!=(const Iterator &rhs) {
+            return ptr->getData().getKey() != rhs.ptr->getData().getKey();
+        }
 
-        bool operator>(const Iterator &);
+        bool operator<(const Iterator &rhs) {
+            return ptr->getData().getKey() < rhs.ptr->getData().getKey();
+        }
 
-        bool operator>=(const Iterator &);
+        bool operator<=(const Iterator &rhs) {
+            return ptr->getData().getKey() <= rhs.ptr->getData().getKey();
+        }
+
+        bool operator>(const Iterator &rhs) {
+            return ptr->getData().getKey() > rhs.ptr->getData().getKey();
+        }
+
+        bool operator>=(const Iterator &rhs) {
+            return ptr->getData().getKey() >= rhs.ptr->getData().getKey();
+        }
     };
 
     class ConstIterator {
@@ -124,29 +220,73 @@ private:
 
         explicit ConstIterator(Pair<T, U> data) : ptr(new Node(data)) {}
 
-        ConstIterator(const ConstIterator &right) : ptr(right.ptr) {}
+        ConstIterator(const ConstIterator &ori) : ptr(ori.ptr) {}
 
-        Pair<T, U> &operator*();
+        ConstIterator &operator=(const ConstIterator &ori) {
+            if (&ori == this) {
+                return (*this);
+            }
+            ptr = ori.ptr;
+            return (*this);
+        }
 
-        const ConstIterator operator++(int);
+        explicit operator Node *() {
+            return ptr;
+        }
 
-        ConstIterator &operator++();
+        const Pair<T, U> operator*() {
+            return ptr->getData();
+        }
 
-        const ConstIterator operator--(int);
+        const Pair<T, U> *operator->() {
+            return &(ptr->getData());
+        }
 
-        ConstIterator &operator--();
+        constexpr ConstIterator operator++(int) {
+            ConstIterator tmp(*this);
+            ++(*this);
+            return tmp;
+        }
 
-        bool operator==(const ConstIterator &);
+        ConstIterator &operator++() {
+            ptr = Node::treeNext(ptr);
+            return (*this);
+        }
 
-        bool operator!=(const ConstIterator &);
+        constexpr ConstIterator operator--(int) {
+            ConstIterator tmp(*this);
+            --(*this);
+            return tmp;
+        }
 
-        bool operator<(const ConstIterator &);
+        ConstIterator &operator--() {
+            ptr = Node::treePrev(ptr);
+            return (*this);
+        }
 
-        bool operator<=(const ConstIterator &);
+        bool operator==(const ConstIterator &rhs) {
+            return ptr->getData().getKey() == rhs.ptr->getData().getKey();
+        }
 
-        bool operator>(const ConstIterator &);
+        bool operator!=(const ConstIterator &rhs) {
+            return ptr->getData().getKey() != rhs.ptr->getData().getKey();
+        }
 
-        bool operator>=(const ConstIterator &);
+        bool operator<(const ConstIterator &rhs) {
+            return ptr->getData().getKey() < rhs.ptr->getData().getKey();
+        }
+
+        bool operator<=(const ConstIterator &rhs) {
+            return ptr->getData().getKey() <= rhs.ptr->getData().getKey();
+        }
+
+        bool operator>(const ConstIterator &rhs) {
+            return ptr->getData().getKey() > rhs.ptr->getData().getKey();
+        }
+
+        bool operator>=(const ConstIterator &rhs) {
+            return ptr->getData().getKey() >= rhs.ptr->getData().getKey();
+        }
     };
 
     unsigned int distance(Iterator, Iterator);
@@ -156,9 +296,13 @@ private:
 public:
     Map() : root(nullptr) {}
 
-    Map(const Map<T, U> &right) : root(right.root) {}
+    Map(const Map<T, U> &ori) : root(ori.root) {}
+
+    Map &operator=(const Map<T, U> &);
 
     ~Map();
+
+    void clear();
 
     Iterator begin();
 
@@ -174,212 +318,76 @@ public:
 
     unsigned int size();
 
-
 };
 
 template<typename T, typename U>
-Pair<T, U> &Map<T, U>::ConstIterator::operator*() {
-    return ptr->getData();
+unsigned int Map<T, U>::distance(Iterator first, Iterator last) {
+    unsigned int sum = 0;
+    for (Iterator it = first; it != last; ++it, ++sum);
+    return sum;
 }
 
 template<typename T, typename U>
-const typename Map<T, U>::ConstIterator Map<T, U>::ConstIterator::operator++(int) {
-    Map<T, U>::ConstIterator tmp(*this);
-    ++(*this);
-    return tmp;
-}
-
-template<typename T, typename U>
-typename Map<T, U>::ConstIterator &Map<T, U>::ConstIterator::operator++() {
-    if (ptr->hasRight()) {
-        ptr = ptr->getRight();
-        while (ptr->hasLeft()) {
-            ptr = ptr->getLeft();
-        }
-    } else if (ptr->hasFather() && ptr->getFather()->hasLeft() == this) {
-        ptr = ptr->getFather();
+Map<T, U> &Map<T, U>::operator=(const Map<T, U> &ori) {
+    if (&ori == this) {
+        return (*this);
     }
+    clear();
+    root = ori.root;
     return (*this);
 }
 
 template<typename T, typename U>
-const typename Map<T, U>::ConstIterator Map<T, U>::ConstIterator::operator--(int) {
-    Map<T, U>::ConstIterator tmp(*this);
-    --(*this);
-    return tmp;
+Map<T, U>::~Map() {
+    clear();
 }
 
 template<typename T, typename U>
-typename Map<T, U>::ConstIterator &Map<T, U>::ConstIterator::operator--() {
-    if (ptr->hasLeft()) {
-        ptr = ptr->getLeft();
-        while (ptr->hasRight()) {
-            ptr = ptr->getRight();
-        }
-    } else if (ptr->hasFather() && ptr->getFather()->hasRight() == this) {
-        ptr = ptr->getFather();
+void Map<T, U>::clear() {
+    Iterator it = begin();
+    Iterator iter = it;
+    while (it != end()) {
+        delete ((Node *)(iter));
+        it ++;
+        iter = it;
     }
-    return (*this);
+    root = nullptr;
 }
 
 template<typename T, typename U>
-bool Map<T, U>::ConstIterator::operator==(const Map::ConstIterator &right) {
-    return ptr->getData().getKey() == right.ptr->getData().getKey();
+typename Map<T, U>::Iterator Map<T, U>::begin() {
+    return Iterator(Node::treeMin(root));
 }
 
 template<typename T, typename U>
-bool Map<T, U>::ConstIterator::operator!=(const Map::ConstIterator &right) {
-    return ptr->getData().getKey() != right.ptr->getData().getKey();
+typename Map<T, U>::ConstIterator Map<T, U>::cBegin() {
+    return ConstIterator(Node::treeMin(root));;
 }
 
 template<typename T, typename U>
-bool Map<T, U>::ConstIterator::operator<(const Map::ConstIterator &right) {
-    return ptr->getData().getKey() < right.ptr->getData().getKey();
+typename Map<T, U>::Iterator Map<T, U>::end() {
+    return Iterator(nullptr);
 }
 
 template<typename T, typename U>
-bool Map<T, U>::ConstIterator::operator<=(const Map::ConstIterator &right) {
-    return ptr->getData().getKey() <= right.ptr->getData().getKey();
+typename Map<T, U>::ConstIterator Map<T, U>::cEnd() {
+    return ConstIterator(nullptr);
 }
 
 template<typename T, typename U>
-bool Map<T, U>::ConstIterator::operator>(const Map::ConstIterator &right) {
-    return ptr->getData().getKey() > right.ptr->getData().getKey();
+Pair<T, U> &Map<T, U>::at(const T &) {
+    return ;
 }
 
 template<typename T, typename U>
-bool Map<T, U>::ConstIterator::operator>=(const Map::ConstIterator &right) {
-    return ptr->getData().getKey() >= right.ptr->getData().getKey();
+const Pair<T, U> &Map<T, U>::at(const T &) const {
+    return ;
 }
 
 template<typename T, typename U>
-Pair<T, U> &Map<T, U>::Iterator::operator*() {
-    return ptr->getData();
+unsigned int Map<T, U>::size() {
+    return distance(begin(), end());
 }
 
-template<typename T, typename U>
-const typename Map<T, U>::Iterator Map<T, U>::Iterator::operator++(int) {
-    Map<T, U>::Iterator tmp(*this);
-    ++(*this);
-    return tmp;
-}
-
-template<typename T, typename U>
-typename Map<T, U>::Iterator &Map<T, U>::Iterator::operator++() {
-    if (ptr->hasRight()) {
-        ptr = ptr->getRight();
-        while (ptr->hasLeft()) {
-            ptr = ptr->getLeft();
-        }
-    } else if (ptr->hasFather() && ptr->getFather()->hasLeft() == this) {
-        ptr = ptr->getFather();
-    }
-    return (*this);
-}
-
-template<typename T, typename U>
-const typename Map<T, U>::Iterator Map<T, U>::Iterator::operator--(int) {
-    Map<T, U>::Iterator tmp(*this);
-    --(*this);
-    return tmp;
-}
-
-template<typename T, typename U>
-typename Map<T, U>::Iterator &Map<T, U>::Iterator::operator--() {
-    if (ptr->hasLeft()) {
-        ptr = ptr->getLeft();
-        while (ptr->hasRight()) {
-            ptr = ptr->getRight();
-        }
-    } else if (ptr->hasFather() && ptr->getFather()->hasRight() == this) {
-        ptr = ptr->getFather();
-    }
-    return (*this);
-}
-
-template<typename T, typename U>
-bool Map<T, U>::Iterator::operator==(const Map::Iterator &right) {
-    return ptr->getData().getKey() == right.ptr->getData().getKey();
-}
-
-template<typename T, typename U>
-bool Map<T, U>::Iterator::operator!=(const Map::Iterator &right) {
-    return ptr->getData().getKey() != right.ptr->getData().getKey();
-}
-
-template<typename T, typename U>
-bool Map<T, U>::Iterator::operator<(const Map::Iterator &right) {
-    return ptr->getData().getKey() < right.ptr->getData().getKey();
-}
-
-template<typename T, typename U>
-bool Map<T, U>::Iterator::operator<=(const Map::Iterator &right) {
-    return ptr->getData().getKey() <= right.ptr->getData().getKey();
-}
-
-template<typename T, typename U>
-bool Map<T, U>::Iterator::operator>(const Map::Iterator &right) {
-    return ptr->getData().getKey() > right.ptr->getData().getKey();
-}
-
-template<typename T, typename U>
-bool Map<T, U>::Iterator::operator>=(const Map::Iterator &right) {
-    return ptr->getData().getKey() >= right.ptr->getData().getKey();
-}
-
-template<typename T, typename U>
-typename Map<T, U>::Node *Map<T, U>::Node::getLeft() const {
-    return left;
-}
-
-template<typename T, typename U>
-void Map<T, U>::Node::setLeft(Map::Node *l) {
-    Node::left = l;
-}
-
-template<typename T, typename U>
-typename Map<T, U>::Node *Map<T, U>::Node::getRight() const {
-    return right;
-}
-
-template<typename T, typename U>
-void Map<T, U>::Node::setRight(Map::Node *r) {
-    Node::right = r;
-}
-
-template<typename T, typename U>
-const Pair<T, U> &Map<T, U>::Node::getData() const {
-    return data;
-}
-
-template<typename T, typename U>
-void Map<T, U>::Node::setData(const Pair<T, U> &d) {
-    Node::data = d;
-}
-
-template<typename T, typename U>
-bool Map<T, U>::Node::hasLeft() const {
-    return left != nullptr;
-}
-
-template<typename T, typename U>
-bool Map<T, U>::Node::hasRight() const {
-    return right != nullptr;
-}
-
-template<typename T, typename U>
-typename Map<T, U>::Node *Map<T, U>::Node::getFather() const {
-    return father;
-}
-
-template<typename T, typename U>
-void Map<T, U>::Node::setFather(Map::Node *f) {
-    Node::father = f;
-}
-
-template<typename T, typename U>
-bool Map<T, U>::Node::hasFather() const {
-    return father != nullptr;
-}
 
 #endif //DATA_STRUCTURES_MAP_H

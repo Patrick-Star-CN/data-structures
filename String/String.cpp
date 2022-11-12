@@ -10,7 +10,7 @@ String::String() : bufLen(1) {
     buffer[0] = '\0';
 }
 
-String::String(unsigned size) : bufLen(size) {
+String::String(unsigned int size) : bufLen(size) {
     buffer = new(std::nothrow) char[size];
     assert(buffer != nullptr);
     for (unsigned i = 0; i < bufLen; i++) {
@@ -53,8 +53,11 @@ char *String::getBuffer() const {
     return buffer;
 }
 
-String &String::operator=(const String &right) {
-    const unsigned rightLength = right.length();
+String &String::operator=(const String &ori) {
+    if (this == &ori) {
+        return (*this);
+    }
+    const unsigned rightLength = ori.length();
     if (rightLength >= bufLen) {
         delete[]buffer;
         bufLen = 1 + rightLength;
@@ -62,15 +65,15 @@ String &String::operator=(const String &right) {
         assert(buffer != nullptr);
     }
     unsigned i = 0;
-    for (; right.buffer[i] != '\0'; i++) {
-        buffer[i] = right.buffer[i];
+    for (; ori.buffer[i] != '\0'; i++) {
+        buffer[i] = ori.buffer[i];
     }
     buffer[i] = '\0';
     return (*this);
 }
 
-String &String::operator=(const char *right) {
-    const unsigned rightLength = cStrLen(right);
+String &String::operator=(const char *ori) {
+    const unsigned rightLength = cStrLen(ori);
     if (rightLength >= bufLen) {
         delete[]buffer;
         bufLen = 1 + rightLength;
@@ -78,8 +81,8 @@ String &String::operator=(const char *right) {
         assert(buffer != nullptr);
     }
     unsigned i = 0;
-    for (; right[i] != '\0'; i++) {
-        buffer[i] = right[i];
+    for (; ori[i] != '\0'; i++) {
+        buffer[i] = ori[i];
     }
     buffer[i] = '\0';
     return (*this);
@@ -95,9 +98,9 @@ char &String::operator[](unsigned index) {
     return buffer[index];
 }
 
-int String::compare(const String &right) {
+int String::compare(const String &rhs) {
     char *p = buffer;
-    char *q = right.buffer;
+    char *q = rhs.buffer;
 
     for (; (*p != '\0') && (*p == *q); p++, q++);
     return *p - *q;
@@ -133,9 +136,9 @@ std::ostream &operator<<(std::ostream &out, const String &str) {
     return out;
 }
 
-String String::operator+(const String &right) {
+String String::operator+(const String &rhs) {
     String newString(*this);
-    newString += right;
+    newString += rhs;
     return newString;
 }
 
@@ -182,32 +185,32 @@ int *String::getPrefix() const {
     return prefix;
 }
 
-bool String::operator<=(const String &right) {
-    return compare(right) <= 0;
+bool String::operator<=(const String &rhs) {
+    return compare(rhs) <= 0;
 }
 
-bool String::operator<(const String &right) {
-    return compare(right) < 0;
+bool String::operator<(const String &rhs) {
+    return compare(rhs) < 0;
 }
 
-bool String::operator>=(const String &right) {
-    return compare(right) >= 0;
+bool String::operator>=(const String &rhs) {
+    return compare(rhs) >= 0;
 }
 
-bool String::operator>(const String &right) {
-    return compare(right) > 0;
+bool String::operator>(const String &rhs) {
+    return compare(rhs) > 0;
 }
 
-bool String::operator==(const String &right) {
-    return compare(right) == 0;
+bool String::operator==(const String &rhs) {
+    return compare(rhs) == 0;
 }
 
-bool String::operator!=(const String &right) {
-    return compare(right) != 0;
+bool String::operator!=(const String &rhs) {
+    return compare(rhs) != 0;
 }
 
-void String::operator+=(const String &right) {
-    unsigned int len = bufLen + right.bufLen - 1;
+void String::operator+=(const String &rhs) {
+    unsigned int len = bufLen + rhs.bufLen - 1;
     char *newBuffer = new(std::nothrow) char[len];
     assert(newBuffer != nullptr);
     int i = 0;
@@ -215,7 +218,7 @@ void String::operator+=(const String &right) {
         newBuffer[i] = buffer[i];
     }
     for (unsigned int j = 0; i < len - 1; i++, j++) {
-        newBuffer[i] = right.buffer[j];
+        newBuffer[i] = rhs.buffer[j];
     }
     newBuffer[i] = '\0';
     bufLen = len;
@@ -223,7 +226,7 @@ void String::operator+=(const String &right) {
     buffer = newBuffer;
 }
 
-String String::subString(unsigned pos, unsigned len) const {
+String String::subString(unsigned int pos, unsigned int len) const {
     String newStr(len + 1);
     for (unsigned int i = pos, j = 0; i < pos + len; i++, j++) {
         newStr.buffer[j] = buffer[i];
@@ -231,21 +234,21 @@ String String::subString(unsigned pos, unsigned len) const {
     return newStr;
 }
 
-String String::replaceAll(const String &subString_, const String &newSubstring) {
+String String::replaceAll(const String &subStr, const String &newSubstr) {
     String newStr;
-    int i = KMPMatch(subString_, 0), j = 0, k = 0;
-    for (; i != -1; k++, i = KMPMatch(subString_, k)) {
+    int i = KMPMatch(subStr, 0), j = 0, k = 0;
+    for (; i != -1; k++, i = KMPMatch(subStr, k)) {
         newStr += subString(j, i - j);
-        newStr += newSubstring;
-        j = i + cStrLen(subString_.getBuffer());
+        newStr += newSubstr;
+        j = i + cStrLen(subStr.getBuffer());
     }
     newStr += subString(j, bufLen - j);
     (*this) = newStr;
     return newStr;
 }
 
-unsigned String::find(const String &subString_, unsigned num) const {
-    return KMPMatch(subString_, num);
+unsigned String::find(const String &subStr, unsigned num) const {
+    return KMPMatch(subStr, num);
 }
 
 std::istream &String::read(std::istream &in, char delim) {
@@ -260,9 +263,9 @@ std::istream &String::read(std::istream &in, char delim) {
     return in;
 }
 
-String String::reverse(const String::Iterator begin, const String::Iterator end) {
+String String::reverse(const String::Iterator first, const String::Iterator last) {
     String str;
-    for (Iterator it = begin; it != end; it++) {
+    for (Iterator it = first; it != last; it++) {
         str = *it + str;
     }
     return str;
@@ -276,28 +279,28 @@ String::Iterator String::end() const {
     return String::Iterator(buffer + cStrLen(buffer));
 }
 
-String toString(int number) {
+String toString(int ori) {
     String str;
-    if (number < 0) {
+    if (ori < 0) {
         str += String('-');
-        number = -number;
-    } else if (!number) {
+        ori = -ori;
+    } else if (!ori) {
         str = String('0');
         return str;
     }
-    while (number) {
-        str = char(number % 10 + '0') + str;
-        number /= 10;
+    while (ori) {
+        str = char(ori % 10 + '0') + str;
+        ori /= 10;
     }
     return str;
 }
 
-String operator+(const char c, String &right) {
-    String str(right.length() + 1);
+String operator+(const char c, String &rhs) {
+    String str(rhs.length() + 1);
     str.buffer[0] = c;
     int i = 1;
-    for (; i < right.bufLen; i++) {
-        str.buffer[i] = right.buffer[i - 1];
+    for (; i < rhs.bufLen; i++) {
+        str.buffer[i] = rhs.buffer[i - 1];
     }
     str.buffer[i] = '\0';
     return str;

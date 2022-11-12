@@ -11,7 +11,7 @@ private:
 
     int *getPrefix() const;
 
-    int KMPMatch(const String &pattern, unsigned int) const;
+    int KMPMatch(const String &, unsigned int) const;
 
     int compare(const String &);
 
@@ -23,9 +23,9 @@ private:
 
         Iterator() : now(nullptr) {}
 
-        bool operator==(const Iterator &rhs) const;
+        bool operator==(const Iterator &) const;
 
-        bool operator!=(const Iterator &rhs) const;
+        bool operator!=(const Iterator &) const;
 
         const Iterator operator++(int);
 
@@ -47,9 +47,9 @@ private:
 
         ConstIterator() : now(nullptr) {}
 
-        bool operator==(const ConstIterator &rhs) const;
+        bool operator==(const ConstIterator &) const;
 
-        bool operator!=(const ConstIterator &rhs) const;
+        bool operator!=(const ConstIterator &) const;
 
         const ConstIterator operator++(int);
 
@@ -68,7 +68,7 @@ private:
 public:
     String();
 
-    explicit String(unsigned);
+    explicit String(unsigned int);
 
     explicit String(char);
 
@@ -86,25 +86,25 @@ public:
 
     String &operator=(const char *);
 
-    String operator+(const String &right);
+    String operator+(const String &);
 
-    friend String operator+(const char, String &right);
+    friend String operator+(const char, String &);
 
     char &operator[](unsigned);
 
-    bool operator<=(const String &right);
+    bool operator<=(const String &);
 
-    bool operator<(const String &right);
+    bool operator<(const String &);
 
-    bool operator>=(const String &right);
+    bool operator>=(const String &);
 
-    bool operator>(const String &right);
+    bool operator>(const String &);
 
-    bool operator==(const String &right);
+    bool operator==(const String &);
 
-    bool operator!=(const String &right);
+    bool operator!=(const String &);
 
-    void operator+=(const String &right);
+    void operator+=(const String &);
 
     char *getBuffer() const;
 
@@ -118,7 +118,7 @@ public:
 
     String::ConstIterator cend() const;
 
-    String subString(unsigned, unsigned) const;
+    String subString(unsigned int, unsigned int) const;
 
     String replaceAll(const String &, const String &);
 

@@ -8,7 +8,6 @@ template<typename T>
 class Deque {
 private:
 
-
     T *data;
     unsigned int capacity;
     unsigned int size;
@@ -18,6 +17,96 @@ private:
     void zoom();
 
 public:
+    class ConstIterator {
+    private:
+        const T *first;
+        const T *ptr;
+        const unsigned int capacity;
+
+    public:
+        ConstIterator() : ptr(nullptr), first(nullptr), capacity(0) {}
+
+        explicit ConstIterator(T *p, T *v, unsigned int capacity) : ptr(p), first(v), capacity(capacity) {}
+
+        ConstIterator(const ConstIterator &right) : ptr(right.ptr) {}
+
+        const ConstIterator operator++(int) {
+            ConstIterator tmp(*this);
+            ++(*this);
+            return tmp;
+        }
+
+        const ConstIterator operator--(int) {
+            ConstIterator tmp(*this);
+            --(*this);
+            return tmp;
+        }
+
+        ConstIterator &operator++() {
+            if (ptr - first == capacity - 1) {
+                ptr = first;
+                return (*this);
+            }
+            ++ptr;
+            return (*this);
+        }
+
+        ConstIterator &operator--() {
+            if (ptr == first) {
+                ptr = first + capacity;
+                return (*this);
+            }
+            --ptr;
+            return (*this);
+        }
+
+        ConstIterator operator+(int n) {
+            Iterator tmp(*this);
+            tmp += n;
+            return tmp;
+        }
+
+        ConstIterator operator-(int n) {
+            Iterator tmp(*this);
+            tmp -= n;
+            return tmp;
+        }
+
+        ConstIterator &operator+=(int n) {
+            if (n == 0) {
+                return (*this);
+            }
+            n += ptr - first;
+            if (n > 0) {
+                ptr = first + n % capacity;
+            } else {
+                int z = capacity - 1 - n;
+                ptr = first + (capacity - 1 - z % capacity);
+            }
+            return (*this);
+        }
+
+        ConstIterator &operator-=(int n) {
+            return (*this) += -n;
+        }
+
+        T &operator*() {
+            return *(ptr);
+        }
+
+        const T *operator->() {
+            return ptr;
+        }
+
+        bool operator==(const ConstIterator &rhs) const {
+            return ptr == rhs.ptr;
+        }
+
+        bool operator!=(const ConstIterator &rhs) const {
+            return rhs != *this;
+        }
+    };
+
     class Iterator {
     private:
         T *first;
@@ -27,34 +116,88 @@ public:
     public:
         Iterator() : ptr(nullptr), first(nullptr), capacity(0) {}
 
-        explicit Iterator(T *p, T *data, unsigned int capacity) : ptr(p), first(data), capacity(capacity) {}
+        explicit Iterator(T *p, T *v, unsigned int capacity) : ptr(p), first(v), capacity(capacity) {}
 
         Iterator(const Iterator &right) : ptr(right.ptr) {}
 
-        const Iterator operator++(int);
+        const Iterator operator++(int) {
+            Iterator tmp(*this);
+            ++(*this);
+            return tmp;
+        }
 
-        const Iterator operator--(int);
+        const Iterator operator--(int) {
+            Iterator tmp(*this);
+            --(*this);
+            return tmp;
+        }
 
-        Iterator &operator++();
+        Iterator &operator++() {
+            if (ptr - first == capacity - 1) {
+                ptr = first;
+                return (*this);
+            }
+            ++ptr;
+            return (*this);
+        }
 
-        Iterator &operator--();
+        Iterator &operator--() {
+            if (ptr == first) {
+                ptr = first + capacity;
+                return (*this);
+            }
+            --ptr;
+            return (*this);
+        }
 
-        Iterator operator+(int);
+        Iterator operator+(int n) {
+            Iterator tmp(*this);
+            tmp += n;
+            return tmp;
+        }
 
-        Iterator operator-(int);
+        Iterator operator-(int n) {
+            Iterator tmp(*this);
+            tmp -= n;
+            return tmp;
+        }
 
-        Iterator &operator+=(int);
+        Iterator &operator+=(int n) {
+            if (n == 0) {
+                return (*this);
+            }
+            n += ptr - first;
+            if (n > 0) {
+                ptr = first + n % capacity;
+            } else {
+                int z = capacity - 1 - n;
+                ptr = first + (capacity - 1 - z % capacity);
+            }
+            return (*this);
+        }
 
-        Iterator &operator-=(int);
+        Iterator &operator-=(int n) {
+            return (*this) += -n;
+        }
 
-        bool operator==(const Iterator &) const;
+        T &operator*() {
+            return *(ptr);
+        }
 
-        bool operator!=(const Iterator &) const;
+        T *operator->() {
+            return ptr;
+        }
 
-        T &operator*();
+        bool operator==(const Iterator &rhs) const {
+            return ptr == rhs.ptr;
+        }
+
+        bool operator!=(const Iterator &rhs) const {
+            return rhs != *this;
+        }
     };
 
-    Deque() : data(nullptr), first(0), last(0), capacity(0), size(0) {}
+    Deque() : data(new T[16]), first(0), last(0), capacity(16), size(0) {}
 
     explicit Deque(unsigned int capacity) : first(0), last(0), capacity(capacity), size(0) {
         data = new(std::nothrow) T[capacity];
@@ -68,7 +211,11 @@ public:
 
     Iterator begin();
 
+    ConstIterator cBegin();
+
     Iterator end();
+
+    ConstIterator cEnd();
 
     void pushBack(const T &);
 
@@ -89,6 +236,8 @@ public:
     bool empty();
 };
 
+#endif //DATA_STRUCTURES_DEQUE_H
+
 template<typename T>
 typename Deque<T>::Iterator Deque<T>::begin() {
     return Iterator(data + first, data, capacity);
@@ -97,6 +246,16 @@ typename Deque<T>::Iterator Deque<T>::begin() {
 template<typename T>
 typename Deque<T>::Iterator Deque<T>::end() {
     return Iterator(data + (last + 1) % capacity, data, capacity);
+}
+
+template<typename T>
+typename Deque<T>::ConstIterator Deque<T>::cBegin() {
+    return ConstIterator(data + first, data, capacity);
+}
+
+template<typename T>
+typename Deque<T>::ConstIterator Deque<T>::cEnd() {
+    return ConstIterator(data + (last + 1) % capacity, data, capacity);
 }
 
 template<typename T>
@@ -225,88 +384,3 @@ void Deque<T>::zoom() {
     first = 0;
     last = size - 1;
 }
-
-template<typename T>
-const typename Deque<T>::Iterator Deque<T>::Iterator::operator++(int) {
-    Deque::Iterator tmp(*this);
-    ++(*this);
-    return tmp;
-}
-
-template<typename T>
-const typename Deque<T>::Iterator Deque<T>::Iterator::operator--(int) {
-    Deque::Iterator tmp(*this);
-    --(*this);
-    return tmp;
-}
-
-template<typename T>
-typename Deque<T>::Iterator &Deque<T>::Iterator::operator++() {
-    if (ptr - first == capacity - 1) {
-        ptr = first;
-        return (*this);
-    }
-    ++ptr;
-    return (*this);
-}
-
-template<typename T>
-typename Deque<T>::Iterator &Deque<T>::Iterator::operator--() {
-    if (ptr == first) {
-        ptr = first + capacity;
-        return (*this);
-    }
-    --ptr;
-    return (*this);
-}
-
-template<typename T>
-typename Deque<T>::Iterator Deque<T>::Iterator::operator+(int n) {
-    Deque::Iterator tmp(*this);
-    tmp += n;
-    return tmp;
-}
-
-template<typename T>
-typename Deque<T>::Iterator Deque<T>::Iterator::operator-(int n) {
-    Deque::Iterator tmp(*this);
-    tmp -= n;
-    return tmp;
-}
-
-template<typename T>
-typename Deque<T>::Iterator &Deque<T>::Iterator::operator+=(int n) {
-    if (n == 0) {
-        return (*this);
-    }
-    n += ptr - first;
-    if (n > 0) {
-        ptr = first + n % capacity;
-    } else {
-        int z = capacity - 1 - n;
-        ptr = first + (capacity - 1 - z % capacity);
-    }
-    return (*this);
-}
-
-template<typename T>
-typename Deque<T>::Iterator &Deque<T>::Iterator::operator-=(int n) {
-    return (*this) += -n;
-}
-
-template<typename T>
-T &Deque<T>::Iterator::operator*() {
-    return *(ptr);
-}
-
-template<typename T>
-bool Deque<T>::Iterator::operator==(const Deque::Iterator &rhs) const {
-    return ptr == rhs.ptr;
-}
-
-template<typename T>
-bool Deque<T>::Iterator::operator!=(const Deque::Iterator &rhs) const {
-    return !(rhs == *this);
-}
-
-#endif //DATA_STRUCTURES_DEQUE_H
