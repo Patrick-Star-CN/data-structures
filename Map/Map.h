@@ -1,6 +1,8 @@
 #ifndef DATA_STRUCTURES_MAP_H
 #define DATA_STRUCTURES_MAP_H
 
+#include <iostream>
+
 template<typename T, typename U>
 class Pair {
 private:
@@ -135,79 +137,18 @@ private:
             }
             return x->getFather();
         }
-    };
 
-    class Iterator {
-    private:
-        Node *ptr;
-
-    public:
-        explicit Iterator(Node *ptr) : ptr(ptr) {}
-
-        explicit Iterator(Pair<T, U> data) : ptr(new Node(data)) {}
-
-        Iterator(const Iterator &ori) : ptr(ori.ptr) {}
-
-        Iterator &operator=(const Iterator &ori) {
-            if (&ori == this) {
-                return (*this);
+        Node *treeFind(Node *x, T key) {
+            Node *ptr = x;
+            while (ptr->getData().getKey() != key) {
+                if (ptr->getData().getKey() > key && ptr->hasLeft()) {
+                    ptr = ptr->getLeft();
+                } else if (ptr->getData().getKey() < key && ptr->hasRight()) {
+                    ptr = ptr->getRight();
+                } else {
+                    break;
+                }
             }
-            ptr = ori.ptr;
-            return (*this);
-        }
-
-        Pair<T, U> &operator*() {
-            return ptr->getData();
-        }
-
-        Pair<T, U> *operator->() {
-            return &(ptr->getData());
-        }
-
-        constexpr Iterator operator++(int) {
-            Iterator tmp(*this);
-            ++(*this);
-            return tmp;
-        }
-
-        Iterator &operator++() {
-            ptr = Node::treeNext(ptr);
-            return (*this);
-        }
-
-        constexpr Iterator operator--(int) {
-            Iterator tmp(*this);
-            --(*this);
-            return tmp;
-        }
-
-        Iterator &operator--() {
-            ptr = Node::treePrev(ptr);
-            return (*this);
-        }
-
-        bool operator==(const Iterator &rhs) {
-            return ptr->getData().getKey() == rhs.ptr->getData().getKey();
-        }
-
-        bool operator!=(const Iterator &rhs) {
-            return ptr->getData().getKey() != rhs.ptr->getData().getKey();
-        }
-
-        bool operator<(const Iterator &rhs) {
-            return ptr->getData().getKey() < rhs.ptr->getData().getKey();
-        }
-
-        bool operator<=(const Iterator &rhs) {
-            return ptr->getData().getKey() <= rhs.ptr->getData().getKey();
-        }
-
-        bool operator>(const Iterator &rhs) {
-            return ptr->getData().getKey() > rhs.ptr->getData().getKey();
-        }
-
-        bool operator>=(const Iterator &rhs) {
-            return ptr->getData().getKey() >= rhs.ptr->getData().getKey();
         }
     };
 
@@ -227,6 +168,11 @@ private:
                 return (*this);
             }
             ptr = ori.ptr;
+            return (*this);
+        }
+
+        ConstIterator &operator=(const Node *p) {
+            ptr = p;
             return (*this);
         }
 
@@ -289,6 +235,90 @@ private:
         }
     };
 
+    class Iterator {
+    private:
+        Node *ptr;
+
+    public:
+        explicit Iterator(Node *ptr) : ptr(ptr) {}
+
+        explicit Iterator(Pair<T, U> data) : ptr(new Node(data)) {}
+
+        Iterator(const Iterator &ori) : ptr(ori.ptr) {}
+
+        Iterator &operator=(const Iterator &ori) {
+            if (&ori == this) {
+                return (*this);
+            }
+            ptr = ori.ptr;
+            return (*this);
+        }
+
+        Iterator &operator=(Node *p) {
+            ptr = p;
+            return (*this);
+        }
+
+        Iterator &operator=(const ConstIterator &it) {
+            ptr = ((Node *) (it));
+            return (*this);
+        }
+
+        Pair<T, U> &operator*() {
+            return ptr->getData();
+        }
+
+        Pair<T, U> *operator->() {
+            return &(ptr->getData());
+        }
+
+        constexpr Iterator operator++(int) {
+            Iterator tmp(*this);
+            ++(*this);
+            return tmp;
+        }
+
+        Iterator &operator++() {
+            ptr = Node::treeNext(ptr);
+            return (*this);
+        }
+
+        constexpr Iterator operator--(int) {
+            Iterator tmp(*this);
+            --(*this);
+            return tmp;
+        }
+
+        Iterator &operator--() {
+            ptr = Node::treePrev(ptr);
+            return (*this);
+        }
+
+        bool operator==(const Iterator &rhs) {
+            return ptr->getData().getKey() == rhs.ptr->getData().getKey();
+        }
+
+        bool operator!=(const Iterator &rhs) {
+            return ptr->getData().getKey() != rhs.ptr->getData().getKey();
+        }
+
+        bool operator<(const Iterator &rhs) {
+            return ptr->getData().getKey() < rhs.ptr->getData().getKey();
+        }
+
+        bool operator<=(const Iterator &rhs) {
+            return ptr->getData().getKey() <= rhs.ptr->getData().getKey();
+        }
+
+        bool operator>(const Iterator &rhs) {
+            return ptr->getData().getKey() > rhs.ptr->getData().getKey();
+        }
+
+        bool operator>=(const Iterator &rhs) {
+            return ptr->getData().getKey() >= rhs.ptr->getData().getKey();
+        }
+    };
+
     unsigned int distance(Iterator, Iterator);
 
     Node *root;
@@ -312,12 +342,21 @@ public:
 
     ConstIterator cEnd();
 
-    Pair<T, U> &at(const T &);
+    bool empty();
 
-    const Pair<T, U> &at(const T &) const;
+    T &at(const T &);
+
+    const T &at(const T &) const;
 
     unsigned int size();
 
+    unsigned int count(const T &);
+
+    Iterator find(const T &key);
+
+    ConstIterator find(const T &key) const;
+
+    bool contains(const T &key) const;
 };
 
 template<typename T, typename U>
@@ -347,8 +386,8 @@ void Map<T, U>::clear() {
     Iterator it = begin();
     Iterator iter = it;
     while (it != end()) {
-        delete ((Node *)(iter));
-        it ++;
+        delete ((Node *) (iter));
+        it++;
         iter = it;
     }
     root = nullptr;
@@ -375,18 +414,54 @@ typename Map<T, U>::ConstIterator Map<T, U>::cEnd() {
 }
 
 template<typename T, typename U>
-Pair<T, U> &Map<T, U>::at(const T &) {
-    return ;
+T &Map<T, U>::at(const T &key) {
+    Iterator it(Node::treeFind(root, key));
+    if (it->getKey() == key) {
+        return *it;
+    }
+    throw std::runtime_error("OUT_OF_RANGE");
 }
 
 template<typename T, typename U>
-const Pair<T, U> &Map<T, U>::at(const T &) const {
-    return ;
+const T &Map<T, U>::at(const T &key) const {
+    ConstIterator it(Node::treeFind(root, key));
+    if (it->getKey() == key) {
+        return *it;
+    }
+    throw std::runtime_error("OUT_OF_RANGE");
 }
 
 template<typename T, typename U>
 unsigned int Map<T, U>::size() {
     return distance(begin(), end());
+}
+
+template<typename T, typename U>
+bool Map<T, U>::empty() {
+    return begin() == end();
+}
+
+template<typename T, typename U>
+unsigned int Map<T, U>::count(const T &key) {
+    return (contains(key) ? 1 : 0);
+}
+
+template<typename T, typename U>
+typename Map<T, U>::Iterator Map<T, U>::find(const T &key) {
+    Iterator it(Node::treeFind(root, key));
+    return (it->getKey() == key ? it : end());
+}
+
+template<typename T, typename U>
+typename Map<T, U>::ConstIterator Map<T, U>::find(const T &key) const {
+    ConstIterator it(Node::treeFind(root, key));
+    return (it->getKey() == key ? it : cEnd());
+}
+
+template<typename T, typename U>
+bool Map<T, U>::contains(const T &key) const {
+    ConstIterator it(Node::treeFind(root, key));
+    return it->getKey() == key;
 }
 
 

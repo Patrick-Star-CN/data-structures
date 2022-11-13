@@ -337,7 +337,7 @@ unsigned int LinkList<T>::size() const {
 
 template<typename T>
 bool LinkList<T>::empty() {
-    return head == nullptr;
+    return begin() == end();
 }
 
 template<typename T>
