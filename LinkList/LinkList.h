@@ -578,34 +578,10 @@ typename LinkList<T>::Iterator LinkList<T>::erase(LinkList::Iterator pos) {
 
 template<typename T>
 typename LinkList<T>::Iterator LinkList<T>::erase(LinkList::Iterator first, LinkList::Iterator last) {
-    if (first == last) {
-        return last;
+    while (first != last) {
+        first = erase(first);
     }
-    LinkList::Iterator res(end());
-    LinkList::Iterator it(first);
-    if (first == head && last == end()) {
-        head = nullptr;
-        tail = nullptr;
-    } else if (last == end()) {
-        tail = first - 1;
-        tail->setNext(nullptr);
-    } else if (first == head) {
-        head = last;
-        head->setPrior(nullptr);
-        res = last;
-    } else {
-        LinkList::ListNode *prior = first - 1;
-        LinkList::ListNode *next = last;
-        prior->setNext(next);
-        next->setPrior(prior);
-        res = last;
-    }
-    while (it != last) {
-        auto it_ = it + 1;
-        delete it;
-        it = it_;
-    }
-    return res;
+    return last;
 }
 
 template<typename T>

@@ -137,7 +137,7 @@ int main() {
     while (cin >> x >> z && (z || x != 0)) {
         list1.pushBack(Term(z, x));
     }
-    cout << "请输入多项式Q，以指数升序的形式输入，每一项格式为\"系数 指数\"" << endl;
+    /*cout << "请输入多项式Q，以指数升序的形式输入，每一项格式为\"系数 指数\"" << endl;
     cout << "输入完成后以\"0 0\"表示结束" << endl;
     while (cin >> x >> z && (z || x != 0)) {
         list2.pushBack(Term(z, x));
@@ -149,6 +149,6 @@ int main() {
     cout << "Q'\t\t=";
     display(cout, der(list2));
     cout << "P * Q\t=";
-    display(cout, mul(list1, list2));
+    display(cout, mul(list1, list2));*/
     return 0;
 }

@@ -38,12 +38,13 @@ private:
     private:
         Node *left;
         Node *right;
-        Node *father;
+        Node *parent;
+        bool isBlack;
         Pair<T, U> data;
     public:
-        explicit Node(Pair<T, U> data) : data(data), left(nullptr), right(nullptr), father(nullptr) {}
+        explicit Node(Pair<T, U> data) : data(data), left(nullptr), right(nullptr), parent(nullptr), isBlack(false) {}
 
-        explicit Node(Pair<T, U> data, Node *father) : data(data), left(nullptr), right(nullptr), father(father) {}
+        explicit Node(Pair<T, U> data, Node *father) : data(data), left(nullptr), right(nullptr), parent(father), isBlack(false) {}
 
         Node(const Node &ori) : left(ori.left), right(ori.right), data(ori.data) {}
 
@@ -79,65 +80,79 @@ private:
             Node::data = d;
         }
 
-        Node *getFather() const {
-            return father;
+        Node *getParent() const {
+            return parent;
         }
 
-        void setFather(Node *f) {
-            Node::father = f;
+        void setParent(Node *f) {
+            Node::parent = f;
         }
 
-        bool hasFather() const {
-            return father != nullptr;
+        bool hasParent() const {
+            return parent != nullptr;
         }
 
+        const bool getIsBlack() {
+            return isBlack;
+        }
+
+        void setIsBlack(bool black) {
+            isBlack = black;
+        }
+
+        // 判断x是否为父节点的左子节点，若是则返回1，否则返回0，x为根节点则返回-1
         int treeIsLeftChild(Node *x) {
-            if (!x->hasFather()) {
+            if (!x->hasParent()) {
                 return -1;
             }
-            return x == x->getFather()->getLeft();
+            return x == x->getParent()->getParent();
         }
 
-        Node *treeMin(Node *root) {
-            while (root->hasLeft()) {
-                root = root->getLeft();
+        // 返回以r为根的子树中最小的元素
+        Node *treeMin(Node *r) {
+            while (r->hasLeft()) {
+                r = r->getLeft();
             }
-            return root;
+            return r;
         }
 
-        Node *treeMax(Node *root) {
-            while (root->hasRight()) {
-                root = root->getRight();
+        // 返回以r为根的子树中最大的元素
+        Node *treeMax(Node *r) {
+            while (r->hasRight()) {
+                r = r->getRight();
             }
-            return root;
+            return r;
         }
 
+        // 返回x的下一个节点
         Node *treeNext(Node *x) {
             if (x->hasRight()) {
                 return treeMin(x->getRight());
             }
             while (treeIsLeftChild(x) == 0) {
-                x = x->getFather();
+                x = x->getParent();
             }
             if (treeIsLeftChild(x) == -1) {
                 return nullptr;
             }
-            return x->getFather();
+            return x->getParent();
         }
 
+        // 返回x的上一个节点
         Node *treePrev(Node *x) {
             if (x->hasLeft()) {
                 return treeMax(x->getLeft());
             }
             while (treeIsLeftChild(x) == 1) {
-                x = x->getFather();
+                x = x->getParent();
             }
             if (treeIsLeftChild(x) == -1) {
                 return nullptr;
             }
-            return x->getFather();
+            return x->getParent();
         }
 
+        // 返回以x为根的子树下键为key的节点，若没有则返回key该插入处的根节点
         Node *treeFind(Node *x, T key) {
             Node *ptr = x;
             while (ptr->getData().getKey() != key) {
@@ -147,6 +162,89 @@ private:
                     ptr = ptr->getRight();
                 } else {
                     break;
+                }
+            }
+        }
+
+        // 左转以x为根的子树
+        void treeLeftRotate(Node *x) {
+            Node *y = x->getRight();
+            x->setRight(y->getLeft());
+            if (x->hasRight()) {
+                x->getRight()->setParent(x);
+            }
+            y->setParent(x->getParent());
+            if (treeIsLeftChild(x) == 1) {
+                x->getParent()->setLeft(y);
+            } else if (x->hasParent() != -1) {
+                x->getParent()->setRight(y);
+            }
+            y->setLeft(x);
+            x->setParent(y);
+        }
+
+        // 右转以x为根的子树
+        void treeRightRotate(Node *x) {
+            Node *y = x->getLeft();
+            x->setLeft(y->getRight());
+            if (x->hasLeft()) {
+                x->getLeft()->setParent(x);
+            }
+            y->setParent(x->getParent());
+            if (treeIsLeftChild(x) == 1) {
+                x->getParent()->setLeft(y);
+            } else if (x->hasParent() != -1) {
+                x->getParent()->setRight(y);
+            }
+            y->setRight(x);
+            x->setParent(y);
+        }
+
+        // 插入后对根为r，插入节点为x的树进行自平衡
+        void treeBalanceAfterInsert(Node *r, Node *x) {
+            x->setIsBlack(x == r);
+            while (x != r && !x->getParent()->getIsBlack()) {
+                // 此时x的父节点一定不为根节点
+                if (treeIsLeftChild(x->getParent()) == 1) {
+                    Node *y = x->getParent()->getParent()->getRight();
+                    if (y != nullptr && !y->getIsBlack()) {
+                        x = x->getParent();
+                        x->setIsBlack(true);
+                        x = x->getParent();
+                        x->setIsBlack(x == r);
+                        y->setIsBlack(true);
+                    } else {
+                        if (treeIsLeftChild(x) == 0) {
+                            x = x->getParent();
+                            treeLeftRotate(x);
+                        }
+                        x = x->getParent();
+                        x->setIsBlack(true);
+                        x = x->getParent();
+                        x->setIsBlack(false);
+                        treeRightRotate(x);
+                        break;
+                    }
+                } else {
+                    Node *y = x->getParent()->getParent()->getLeft();
+                    if (y != nullptr && !y->getIsBlack()) {
+                        x = x->getParent();
+                        x->setIsBlack(true);
+                        x = x->getParent();
+                        x->setIsBlack(x == r);
+                        y->setIsBlack(true);
+                    } else {
+                        if (treeIsLeftChild(x) == 1) {
+                            x = x->getParent();
+                            treeRightRotate(x);
+                        }
+                        x = x->getParent();
+                        x->setIsBlack(true);
+                        x = x->getParent();
+                        x->setIsBlack(false);
+                        treeLeftRotate(x);
+                        break;
+                    }
                 }
             }
         }
@@ -357,6 +455,38 @@ public:
     ConstIterator find(const T &key) const;
 
     bool contains(const T &key) const;
+
+    Iterator upperBound(const T &key);
+
+    ConstIterator upperBound(const T &key) const;
+
+    Iterator lowerBound(const T &key);
+
+    ConstIterator lowerBound(const T &key) const;
+
+    Iterator erase(Iterator);
+
+    Iterator erase(ConstIterator);
+
+    Iterator erase(Iterator, Iterator);
+
+    Iterator erase(ConstIterator, ConstIterator);
+
+    unsigned int erase(const T &key);
+
+    Pair<Iterator, bool> insert(const Pair<T, U> &pair);
+
+    Pair<Iterator, bool> insert(Pair<T, U> &&pair);
+
+    void insert(Iterator, Iterator);
+
+    Pair<Iterator, bool> insertOrAssign(const T &key, U &&value);
+
+    Pair<Iterator, bool> insertOrAssign(T &&key, U &&value);
+
+    U &operator[](const T &key);
+
+    U &operator[](T &&key);
 };
 
 template<typename T, typename U>
@@ -400,7 +530,7 @@ typename Map<T, U>::Iterator Map<T, U>::begin() {
 
 template<typename T, typename U>
 typename Map<T, U>::ConstIterator Map<T, U>::cBegin() {
-    return ConstIterator(Node::treeMin(root));;
+    return ConstIterator(Node::treeMin(root));
 }
 
 template<typename T, typename U>
@@ -462,6 +592,90 @@ template<typename T, typename U>
 bool Map<T, U>::contains(const T &key) const {
     ConstIterator it(Node::treeFind(root, key));
     return it->getKey() == key;
+}
+
+template<typename T, typename U>
+typename Map<T, U>::Iterator Map<T, U>::upperBound(const T &key) {
+    Iterator it(Node::treeFind(root, key));
+    return (it->getKey() > key ? it : ++it);
+}
+
+template<typename T, typename U>
+typename Map<T, U>::ConstIterator Map<T, U>::upperBound(const T &key) const {
+    ConstIterator it(Node::treeFind(root, key));
+    return (it->getKey() > key ? it : ++it);
+}
+
+template<typename T, typename U>
+typename Map<T, U>::Iterator Map<T, U>::lowerBound(const T &key) {
+    Iterator it(Node::treeFind(root, key));
+    return (it->getKey() > key ? --it : it);
+}
+
+template<typename T, typename U>
+typename Map<T, U>::ConstIterator Map<T, U>::lowerBound(const T &key) const {
+    ConstIterator it(Node::treeFind(root, key));
+    return (it->getKey() > key ? --it : it);
+}
+
+template<typename T, typename U>
+typename Map<T, U>::Iterator Map<T, U>::erase(Map::Iterator) {
+    return Map::Iterator(nullptr);
+}
+
+template<typename T, typename U>
+typename Map<T, U>::Iterator Map<T, U>::erase(Map::ConstIterator) {
+    return Map::Iterator(nullptr);
+}
+
+template<typename T, typename U>
+typename Map<T, U>::Iterator Map<T, U>::erase(Map::Iterator, Map::Iterator) {
+    return Map::Iterator(nullptr);
+}
+
+template<typename T, typename U>
+typename Map<T, U>::Iterator Map<T, U>::erase(Map::ConstIterator, Map::ConstIterator) {
+    return Map::Iterator(nullptr);
+}
+
+template<typename T, typename U>
+unsigned int Map<T, U>::erase(const T &key) {
+    return 0;
+}
+
+template<typename T, typename U>
+Pair<typename Map<T, U>::Iterator, bool> Map<T, U>::insert(const Pair<T, U> &pair) {
+    return Pair<Iterator, bool>(Map::Iterator(), false);
+}
+
+template<typename T, typename U>
+Pair<typename Map<T, U>::Iterator, bool> Map<T, U>::insert(Pair<T, U> &&pair) {
+    return Pair<Iterator, bool>(Map::Iterator(), false);
+}
+
+template<typename T, typename U>
+void Map<T, U>::insert(Map::Iterator, Map::Iterator) {
+
+}
+
+template<typename T, typename U>
+Pair<typename Map<T, U>::Iterator, bool> Map<T, U>::insertOrAssign(const T &key, U &&value) {
+    return Pair<Iterator, bool>(Map::Iterator(), false);
+}
+
+template<typename T, typename U>
+Pair<typename Map<T, U>::Iterator, bool> Map<T, U>::insertOrAssign(T &&key, U &&value) {
+    return Pair<Iterator, bool>(Map::Iterator(), false);
+}
+
+template<typename T, typename U>
+U &Map<T, U>::operator[](const T &key) {
+    return ;
+}
+
+template<typename T, typename U>
+U &Map<T, U>::operator[](T &&key) {
+    return ;
 }
 
 
