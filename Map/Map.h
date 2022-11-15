@@ -100,7 +100,6 @@ private:
             isBlack = black;
         }
 
-        // 判断x是否为父节点的左子节点，若是则返回1，否则返回0，x为根节点则返回-1
         int treeIsLeftChild(Node *x) {
             if (!x->hasParent()) {
                 return -1;
@@ -108,7 +107,6 @@ private:
             return x == x->getParent()->getParent();
         }
 
-        // 返回以r为根的子树中最小的元素
         Node *treeMin(Node *r) {
             while (r->hasLeft()) {
                 r = r->getLeft();
@@ -116,7 +114,6 @@ private:
             return r;
         }
 
-        // 返回以r为根的子树中最大的元素
         Node *treeMax(Node *r) {
             while (r->hasRight()) {
                 r = r->getRight();
@@ -124,7 +121,6 @@ private:
             return r;
         }
 
-        // 返回x的下一个节点
         Node *treeNext(Node *x) {
             if (x->hasRight()) {
                 return treeMin(x->getRight());
@@ -138,7 +134,6 @@ private:
             return x->getParent();
         }
 
-        // 返回x的上一个节点
         Node *treePrev(Node *x) {
             if (x->hasLeft()) {
                 return treeMax(x->getLeft());
@@ -152,7 +147,6 @@ private:
             return x->getParent();
         }
 
-        // 返回以x为根的子树下键为key的节点，若没有则返回key该插入处的根节点
         Node *treeFind(Node *x, T key) {
             Node *ptr = x;
             while (ptr->getData().getKey() != key) {
@@ -166,7 +160,6 @@ private:
             }
         }
 
-        // 左转以x为根的子树
         void treeLeftRotate(Node *x) {
             Node *y = x->getRight();
             x->setRight(y->getLeft());
@@ -183,7 +176,6 @@ private:
             x->setParent(y);
         }
 
-        // 右转以x为根的子树
         void treeRightRotate(Node *x) {
             Node *y = x->getLeft();
             x->setLeft(y->getRight());
@@ -200,11 +192,9 @@ private:
             x->setParent(y);
         }
 
-        // 插入后对根为r，插入节点为x的树进行自平衡
         void treeBalanceAfterInsert(Node *r, Node *x) {
             x->setIsBlack(x == r);
             while (x != r && !x->getParent()->getIsBlack()) {
-                // 此时x的父节点一定不为根节点
                 if (treeIsLeftChild(x->getParent()) == 1) {
                     Node *y = x->getParent()->getParent()->getRight();
                     if (y != nullptr && !y->getIsBlack()) {
@@ -645,6 +635,8 @@ unsigned int Map<T, U>::erase(const T &key) {
 
 template<typename T, typename U>
 Pair<typename Map<T, U>::Iterator, bool> Map<T, U>::insert(const Pair<T, U> &pair) {
+
+
     return Pair<Iterator, bool>(Map::Iterator(), false);
 }
 
