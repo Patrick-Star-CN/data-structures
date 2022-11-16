@@ -238,6 +238,43 @@ private:
                 }
             }
         }
+
+        void treeRemove(Node *r, Node *z) {
+            Node *y = (z->hasLeft() && z->hasRight() ? treeNext(z) : z);
+            Node *x = y->hasLeft() ? y->getLeft() : y->getRight();
+            Node *w = nullptr;
+            if (x != nullptr) {
+                x->setParent(y->getParent());
+            }
+            if (treeIsLeftChild((y)) == -1) {
+                r = x;
+            } else if (treeIsLeftChild((y)) == 1) {
+                y->getParent()->setLeft(x);
+                w = y->getParent()->getRight();
+            } else {
+                y->getParent()->setRight(x);
+                w = y->getParent()->getLeft();
+            }
+            bool removedBlack = y->getIsBlack();
+            if (y != z) {
+                y->setParent(z->getParent());
+                if (treeIsLeftChild(z) == 1) {
+                    y->getParent()->setLeft(y);
+                } else {
+                    y->getParent()->setRight(y);
+                }
+                y->setLeft(z->getLeft());
+                y->getLeft()->setParent(y);
+                y->setRight(z->getRight());
+                if (y->hasRight()) {
+                    y->getRight()->setParent(y);
+                }
+                y->setIsBlack(z->getIsBlack());
+                if (r == z) {
+                    r = y;
+                }
+            }
+        }
     };
 
     class ConstIterator {
