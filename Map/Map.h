@@ -274,6 +274,84 @@ private:
                     r = y;
                 }
             }
+            if (removedBlack && r != nullptr) {
+                if (x != nullptr) {
+                    x->setIsBlack(true);
+                } else {
+                    while (true) {
+                        if (treeIsLeftChild(w) == 0) {
+                            if (!w->getIsBlack()) {
+                                w->setIsBlack(true);
+                                w->getParent()->setIsBlack(false);
+                                treeLeftRotate(w->getParent());
+                                if (r == w->getLeft()) {
+                                    r = w;
+                                }
+                                w = w->getLeft()->getRight();
+                            }
+                            if ((!w->hasLeft() || w->getLeft()->getIsBlack()) &&
+                                (!w->hasRight() || w->getRight()->getIsBlack())) {
+                                w->setIsBlack(false);
+                                x = w->getParent();
+                                if (x == r || !x->getIsBlack()) {
+                                    x->setIsBlack(true);
+                                    break;
+                                }
+                                w = treeIsLeftChild(x) ?
+                                    x->getParent()->getRight() :
+                                    x->getParent()->getLeft();
+                            } else {
+                                if (!w->hasRight() || w->getRight()->getIsBlack()) {
+                                    w->getLeft()->setIsBlack(true);
+                                    w->setIsBlack(false);
+                                    treeRightRotate(w);
+                                    w = w->getParent();
+                                }
+                                w->setIsBlack(w->getParent()->getIsBlack());
+                                w->getParent()->setIsBlack(true);
+                                w->getRight()->setIsBlack(true);
+                                treeLeftRotate(w->getParent());
+                                break;
+                            }
+                        } else {
+                            if (!w->getIsBlack()) {
+                                w->setIsBlack(true);
+                                w->getParent()->setIsBlack(false);
+                                treeRightRotate(w->getParent());
+                                if (r == w->getRight()) {
+                                    r = w;
+                                }
+                                w = w->getRight()->getLeft();
+                            }
+                            if ((!w->hasLeft() || w->getLeft()->getIsBlack()) &&
+                                (!w->hasRight() || w->getRight()->getIsBlack())) {
+                                w->setIsBlack(false);
+                                x = w->getParent();
+                                if (x == r || !x->getIsBlack()) {
+                                    x->setIsBlack(true);
+                                    break;
+                                }
+                                w = treeIsLeftChild(x) ?
+                                    x->getParent()->getRight() :
+                                    x->getParent()->getLeft();
+                            } else {
+                                if (!w->hasRight() || w->getRight()->getIsBlack()) {
+                                    w->getRight()->setIsBlack(true);
+                                    w->setIsBlack(false);
+                                    treeLeftRotate(w);
+                                    w = w->getParent();
+                                }
+                                w->setIsBlack(w->getParent()->getIsBlack());
+                                w->getParent()->setIsBlack(true);
+                                w->getLeft()->setIsBlack(true);
+                                treeRightRotate(w->getParent());
+                                break;
+                            }
+                        }
+                    }
+                }
+
+            }
         }
     };
 
