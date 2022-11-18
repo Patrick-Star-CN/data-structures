@@ -100,28 +100,28 @@ private:
             isBlack = black;
         }
 
-        int treeIsLeftChild(Node *x) {
+        static int treeIsLeftChild(Node *x) {
             if (!x->hasParent()) {
                 return -1;
             }
-            return x == x->getParent()->getParent();
+            return x == x->getParent()->getLeft();
         }
 
-        Node *treeMin(Node *r) {
+        static Node *treeMin(Node *r) {
             while (r->hasLeft()) {
                 r = r->getLeft();
             }
             return r;
         }
 
-        Node *treeMax(Node *r) {
+        static Node *treeMax(Node *r) {
             while (r->hasRight()) {
                 r = r->getRight();
             }
             return r;
         }
 
-        Node *treeNext(Node *x) {
+        static Node *treeNext(Node *x) {
             if (x->hasRight()) {
                 return treeMin(x->getRight());
             }
@@ -134,7 +134,7 @@ private:
             return x->getParent();
         }
 
-        Node *treePrev(Node *x) {
+        static Node *treePrev(Node *x) {
             if (x->hasLeft()) {
                 return treeMax(x->getLeft());
             }
@@ -147,7 +147,7 @@ private:
             return x->getParent();
         }
 
-        Node *treeFind(Node *x, T key) {
+        static Node *treeFind(Node *x, T key) {
             Node *ptr = x;
             while (ptr->getData().getKey() != key) {
                 if (ptr->getData().getKey() > key && ptr->hasLeft()) {
@@ -158,9 +158,10 @@ private:
                     break;
                 }
             }
+            return ptr;
         }
 
-        void treeLeftRotate(Node *x) {
+        static void treeLeftRotate(Node *x) {
             Node *y = x->getRight();
             x->setRight(y->getLeft());
             if (x->hasRight()) {
@@ -169,14 +170,14 @@ private:
             y->setParent(x->getParent());
             if (treeIsLeftChild(x) == 1) {
                 x->getParent()->setLeft(y);
-            } else if (x->hasParent() != -1) {
+            } else if (x->hasParent()) {
                 x->getParent()->setRight(y);
             }
             y->setLeft(x);
             x->setParent(y);
         }
 
-        void treeRightRotate(Node *x) {
+        static void treeRightRotate(Node *x) {
             Node *y = x->getLeft();
             x->setLeft(y->getRight());
             if (x->hasLeft()) {
@@ -185,14 +186,14 @@ private:
             y->setParent(x->getParent());
             if (treeIsLeftChild(x) == 1) {
                 x->getParent()->setLeft(y);
-            } else if (x->hasParent() != -1) {
+            } else if (x->hasParent()) {
                 x->getParent()->setRight(y);
             }
             y->setRight(x);
             x->setParent(y);
         }
 
-        void treeBalanceAfterInsert(Node *r, Node *x) {
+        static void treeBalanceAfterInsert(Node *r, Node *x) {
             x->setIsBlack(x == r);
             while (x != r && !x->getParent()->getIsBlack()) {
                 if (treeIsLeftChild(x->getParent()) == 1) {
@@ -362,8 +363,6 @@ private:
     public:
         explicit ConstIterator(Node *ptr) : ptr(ptr) {}
 
-        explicit ConstIterator(Pair<T, U> data) : ptr(new Node(data)) {}
-
         ConstIterator(const ConstIterator &ori) : ptr(ori.ptr) {}
 
         ConstIterator &operator=(const ConstIterator &ori) {
@@ -445,8 +444,6 @@ private:
     public:
         explicit Iterator(Node *ptr) : ptr(ptr) {}
 
-        explicit Iterator(Pair<T, U> data) : ptr(new Node(data)) {}
-
         Iterator(const Iterator &ori) : ptr(ori.ptr) {}
 
         Iterator &operator=(const Iterator &ori) {
@@ -465,6 +462,10 @@ private:
         Iterator &operator=(const ConstIterator &it) {
             ptr = ((Node *) (it));
             return (*this);
+        }
+
+        Node *getPtr() const {
+            return ptr;
         }
 
         Pair<T, U> &operator*() {
@@ -555,19 +556,21 @@ public:
 
     unsigned int count(const T &);
 
-    Iterator find(const T &key);
+    Iterator find(const T &);
 
-    ConstIterator find(const T &key) const;
+    ConstIterator find(const T &) const;
 
-    bool contains(const T &key) const;
+    bool contains(const T &) const;
 
-    Iterator upperBound(const T &key);
+    Iterator upperBound(const T &);
 
-    ConstIterator upperBound(const T &key) const;
+    ConstIterator upperBound(const T &) const;
 
-    Iterator lowerBound(const T &key);
+    Iterator lowerBound(const T &);
 
-    ConstIterator lowerBound(const T &key) const;
+    ConstIterator lowerBound(const T &) const;
+
+    Iterator removeNodePoint(Node *);
 
     Iterator erase(Iterator);
 
@@ -577,21 +580,13 @@ public:
 
     Iterator erase(ConstIterator, ConstIterator);
 
-    unsigned int erase(const T &key);
+    Pair<Iterator, bool> insert(const Pair<T, U> &);
 
-    Pair<Iterator, bool> insert(const Pair<T, U> &pair);
+    Pair<Iterator, bool> insert(Pair<T, U> &&);
 
-    Pair<Iterator, bool> insert(Pair<T, U> &&pair);
+    Iterator insertOrAssign(const T &, U &&);
 
-    void insert(Iterator, Iterator);
-
-    Pair<Iterator, bool> insertOrAssign(const T &key, U &&value);
-
-    Pair<Iterator, bool> insertOrAssign(T &&key, U &&value);
-
-    U &operator[](const T &key);
-
-    U &operator[](T &&key);
+    Iterator insertOrAssign(T &&, U &&);
 };
 
 template<typename T, typename U>
@@ -621,7 +616,7 @@ void Map<T, U>::clear() {
     Iterator it = begin();
     Iterator iter = it;
     while (it != end()) {
-        delete ((Node *) (iter));
+        delete iter.getPtr();
         it++;
         iter = it;
     }
@@ -724,65 +719,108 @@ typename Map<T, U>::ConstIterator Map<T, U>::lowerBound(const T &key) const {
 }
 
 template<typename T, typename U>
-typename Map<T, U>::Iterator Map<T, U>::erase(Map::Iterator) {
-    return Map::Iterator(nullptr);
+typename Map<T, U>::Iterator Map<T, U>::erase(Map::Iterator pos) {
+    return removeNodePoint(((Node *) (pos)));
 }
 
 template<typename T, typename U>
-typename Map<T, U>::Iterator Map<T, U>::erase(Map::ConstIterator) {
-    return Map::Iterator(nullptr);
+typename Map<T, U>::Iterator Map<T, U>::erase(Map::ConstIterator pos) {
+    return removeNodePoint(((Node *) (pos)));
 }
 
 template<typename T, typename U>
-typename Map<T, U>::Iterator Map<T, U>::erase(Map::Iterator, Map::Iterator) {
-    return Map::Iterator(nullptr);
+typename Map<T, U>::Iterator Map<T, U>::erase(Map::Iterator first, Map::Iterator last) {
+    for (; first != last; ++first) {
+        erase(first);
+    }
+    return last;
 }
 
 template<typename T, typename U>
-typename Map<T, U>::Iterator Map<T, U>::erase(Map::ConstIterator, Map::ConstIterator) {
-    return Map::Iterator(nullptr);
-}
-
-template<typename T, typename U>
-unsigned int Map<T, U>::erase(const T &key) {
-    return 0;
+typename Map<T, U>::Iterator Map<T, U>::erase(Map::ConstIterator first, Map::ConstIterator last) {
+    for (; first != last; ++first) {
+        erase(first);
+    }
+    return last;
 }
 
 template<typename T, typename U>
 Pair<typename Map<T, U>::Iterator, bool> Map<T, U>::insert(const Pair<T, U> &pair) {
-
-
-    return Pair<Iterator, bool>(Map::Iterator(), false);
+    Node *node(pair);
+    if (!root) {
+        root = node;
+        node->setIsBlack(false);
+    } else {
+        Node *pos = Node::treeFind(root, pair.getKey());
+        if (pos->getData().getKey() == pair.getKey()) {
+            return Pair<typename Map<T, U>::Iterator, bool>(Iterator(pos), false);
+        }
+        node->setParent(pos);
+        if (pos->getData().getKey() > pair.getKey()) {
+            pos->setLeft(node);
+        } else {
+            pos->setRight(node);
+        }
+    }
+    Node::treeBalanceAfterInsert(root, node);
+    while (root->hasParent()) {
+        root = root->getParent();
+    }
+    return Pair<typename Map<T, U>::Iterator, bool>(Iterator(node), true);
 }
 
 template<typename T, typename U>
 Pair<typename Map<T, U>::Iterator, bool> Map<T, U>::insert(Pair<T, U> &&pair) {
-    return Pair<Iterator, bool>(Map::Iterator(), false);
+    Node *node = new Node(pair);
+    if (!root) {
+        root = node;
+    } else {
+        Node *pos = Node::treeFind(root, pair.getKey());
+        if (pos->getData().getKey() == pair.getKey()) {
+            return Pair<typename Map<T, U>::Iterator, bool>(Iterator(pos), false);
+        }
+        node->setParent(pos);
+        if (pos->getData().getKey() > pair.getKey()) {
+            pos->setLeft(node);
+        } else {
+            pos->setRight(node);
+        }
+    }
+    Node::treeBalanceAfterInsert(root, node);
+    while (root->hasParent()) {
+        root = root->getParent();
+    }
+    return Pair<typename Map<T, U>::Iterator, bool>(Iterator(node), true);
 }
 
 template<typename T, typename U>
-void Map<T, U>::insert(Map::Iterator, Map::Iterator) {
-
+typename Map<T, U>::Iterator Map<T, U>::insertOrAssign(const T &key, U &&value) {
+    Node *pos = Node::treeFind(root, key);
+    if (pos->getData().getKey() == key) {
+        pos->getData().setValue(value);
+        return Pair<typename Map<T, U>::Iterator, bool>(Iterator(pos));
+    } else {
+        return insert(Pair<T, U>(key, value));
+    }
 }
 
 template<typename T, typename U>
-Pair<typename Map<T, U>::Iterator, bool> Map<T, U>::insertOrAssign(const T &key, U &&value) {
-    return Pair<Iterator, bool>(Map::Iterator(), false);
+typename Map<T, U>::Iterator Map<T, U>::insertOrAssign(T &&key, U &&value) {
+    Node *pos = Node::treeFind(root, key);
+    if (pos->getData().getKey() == key) {
+        pos->getData().setValue(value);
+        return Pair<typename Map<T, U>::Iterator, bool>(Iterator(pos));
+    } else {
+        return insert(Pair<T, U>(key, value));
+    }
 }
 
 template<typename T, typename U>
-Pair<typename Map<T, U>::Iterator, bool> Map<T, U>::insertOrAssign(T &&key, U &&value) {
-    return Pair<Iterator, bool>(Map::Iterator(), false);
-}
-
-template<typename T, typename U>
-U &Map<T, U>::operator[](const T &key) {
-    return ;
-}
-
-template<typename T, typename U>
-U &Map<T, U>::operator[](T &&key) {
-    return ;
+typename Map<T, U>::Iterator Map<T, U>::removeNodePoint(Node *ptr) {
+    Iterator r(ptr);
+    ++r;
+    treeRemove(root, ptr);
+    return r;
 }
 
 
