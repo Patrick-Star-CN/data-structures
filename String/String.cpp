@@ -4,10 +4,12 @@ unsigned String::length() const {
     return cStrLen(buffer);
 }
 
-String::String() : bufLen(1) {
+String::String() : bufLen(16) {
     buffer = new(std::nothrow) char[bufLen];
     assert(buffer != nullptr);
-    buffer[0] = '\0';
+    for (unsigned i = 0; i < bufLen; i++) {
+        buffer[i] = '\0';
+    }
 }
 
 String::String(unsigned int size) : bufLen(size) {

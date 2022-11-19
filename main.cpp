@@ -1,17 +1,17 @@
-#include "Map/Map.h"
+#include "UserLoginSystem.h"
 #include <iostream>
 
 using namespace std;
 
 int main() {
-    Map<int, int> map;
-    map.insert(Pair<int, int>(4, 1));
-    map.insert(Pair<int, int>(6, 1));
-    map.insert(Pair<int, int>(3, 1));
-    map.insert(Pair<int, int>(1, 1));
-    map.insert(Pair<int, int>(2, 1));
-//    map.insert(Pair<int, int>(3, 1));
-//    map.insert(Pair<int, int>(2, 1));
-//    map.insert(Pair<int, int>(1, 1));
+    UserLoginSystem userLoginSystem;
+    Pair<String, bool> res_ = userLoginSystem.registor();
+    if (res_.getSecond()) {
+        Pair<String, bool> res = userLoginSystem.login();
+        if (res.getSecond()) {
+            userLoginSystem.updatePassword(res.getFirst());
+            userLoginSystem.deleteUser(res.getFirst());
+        }
+    }
     return 0;
 }
