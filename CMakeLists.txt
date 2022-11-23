@@ -9,5 +9,4 @@ add_executable(data_structures
         String/String.h
         Map/Map.h
         LinkList/LinkList.h
-        UserLoginSystem.cpp
-        UserLoginSystem.h)
+        )
