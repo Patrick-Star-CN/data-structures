@@ -5,8 +5,5 @@ set(CMAKE_CXX_STANDARD 14)
 
 add_executable(data_structures
         main.cpp
-        String/String.cpp
-        String/String.h
-        Map/Map.h
-        LinkList/LinkList.h
-        )
+        Deque/Deque.h
+        BST/BST.h)

@@ -358,12 +358,12 @@ void Deque<T>::popFront() {
 
 template<typename T>
 T &Deque<T>::back() {
-    return data[first];
+    return data[last];
 }
 
 template<typename T>
 T &Deque<T>::front() {
-    return data[last];
+    return data[first];
 }
 
 template<typename T>
