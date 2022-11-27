@@ -5,5 +5,4 @@ set(CMAKE_CXX_STANDARD 14)
 
 add_executable(data_structures
         main.cpp
-        Deque/Deque.h
-        BST/BST.h)
+        LinkList/LinkList.h)

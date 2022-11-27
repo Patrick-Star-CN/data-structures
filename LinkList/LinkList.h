@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cassert>
 #include <list>
+
 template<typename T>
 class LinkList {
 private:
@@ -47,6 +48,41 @@ private:
 
         void setPrior(ListNode *p) {
             prior = p;
+        }
+
+        // 交换两个节点，确保 rhs 是在调用点后
+        void swap(ListNode *rhs) {
+            if (getNext() == rhs) {
+                auto p = this->getPrior();
+                auto n = rhs->getNext();
+                this->setNext(n);
+                if (n) {
+                    n->setPrior(this);
+                }
+                this->setNext(rhs);
+
+                rhs->setPrior(p);
+                if (p) {
+                    p->setNext(rhs);
+                }
+                rhs->setNext(this);
+            } else {
+                if (this->getPrior()) {
+                    this->getPrior()->setNext(rhs);
+                }
+                auto p = rhs->getPrior();
+                p->setNext(this);
+                rhs->setPrior(this->getPrior());
+                this->setPrior(p);
+
+                this->getNext()->setPrior(rhs);
+                auto n = rhs->getNext();
+                if (n) {
+                    n->setPrior(this);
+                }
+                rhs->setNext(this->getNext());
+                this->setNext(n);
+            }
         }
 
     private:
@@ -303,6 +339,10 @@ public:
     bool operator==(const LinkList &) const;
 
     bool operator!=(const LinkList &) const;
+
+    void SelectSortList();
+
+    void InsertSortList();
 
 //TODO void swap(LinkList &other)
 //TODO void unique()
@@ -627,4 +667,47 @@ void LinkList<T>::clear() {
     }
     head = nullptr;
     tail = nullptr;
+}
+
+template<typename T>
+void LinkList<T>::SelectSortList() {
+    for (auto ptr1 = head; ptr1; ptr1 = ptr1->getNext()) {
+        auto Min = ptr1;
+        for (auto ptr2 = ptr1->getNext(); ptr2; ptr2 = ptr2->getNext()) {
+            if (ptr2->getData() < Min->getData()) {
+                Min = ptr2;
+            }
+        }
+        if (Min != ptr1) {
+            ptr1->swap(Min);
+            head = head == ptr1 ? Min : head;
+            tail = tail == Min ? ptr1 : tail;
+            ptr1 = Min;
+        }
+    }
+}
+
+template<typename T>
+void LinkList<T>::InsertSortList() {
+    for (auto ptr1 = head->getNext(); ptr1; ptr1 = ptr1->getNext()) {
+        auto ptr2 = head;
+        for (; ptr2 != ptr1 && ptr2->getData() < ptr1->getData(); ptr2 = ptr2->getNext());
+        if (ptr2 != ptr1) {
+            auto ptr = ptr1->getPrior();
+            ptr1->getPrior()->setNext(ptr1->getNext());
+            if (ptr1->getNext()) {
+                ptr1->getNext()->setPrior(ptr1->getPrior());
+            }
+
+            if (ptr2->getPrior()) {
+                ptr2->getPrior()->setNext(ptr1);
+            }
+            ptr1->setPrior(ptr2->getPrior());
+            ptr2->setPrior(ptr1);
+            ptr1->setNext(ptr2);
+            head = head == ptr2 ? ptr1 : head;
+            tail = tail == ptr1 ? ptr : tail;
+            ptr1 = ptr;
+        }
+    }
 }
