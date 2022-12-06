@@ -18,8 +18,6 @@
 
 动态数组实现的栈
 
-## 正在实现中的数据结构
-
 [Map](https://github.com/Patrick-Star-CN/first-structures/tree/master/Map)
 
 红黑树实现的地图
