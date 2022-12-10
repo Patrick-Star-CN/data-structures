@@ -6,23 +6,23 @@
 
 ## 已经实现了的数据结构
 
-[String](https://github.com/Patrick-Star-CN/first-structures/tree/master/String)
+[String](https://github.com/Patrick-Star-CN/data-structures/tree/master/String)
 
 字符串类
 
-[LinkList](https://github.com/Patrick-Star-CN/first-structures/tree/master/LinkList)
+[LinkList](https://github.com/Patrick-Star-CN/data-structures/tree/master/LinkList)
 
 链表实现的列表
 
-[Stack](https://github.com/Patrick-Star-CN/first-structures/tree/master/Stack)
+[Stack](https://github.com/Patrick-Star-CN/data-structures/tree/master/Stack)
 
 动态数组实现的栈
 
-[Map](https://github.com/Patrick-Star-CN/first-structures/tree/master/Map)
+[Map](https://github.com/Patrick-Star-CN/data-structures/tree/master/Map)
 
 红黑树实现的地图
 
-[Deque](https://github.com/Patrick-Star-CN/first-structures/tree/master/Deque)
+[Deque](https://github.com/Patrick-Star-CN/data-structures/tree/master/Deque)
 
 动态循环数组实现的双向队列
 

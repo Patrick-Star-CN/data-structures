@@ -1,14 +1,13 @@
 #include <iostream>
-#include "LinkList/LinkList.h"
+#include "Heap/Heap.h"
 using namespace std;
 
 int main() {
-    LinkList<int> list;
-    list.pushBack(5);
-    list.pushBack(2);
-    list.pushBack(9);
-    list.pushBack(7);
-    list.pushBack(1);
-    list.InsertSortList();
+    heap<int> h;
+    h.add(9);
+    h.add(6);
+    h.add(7);
+    h.add(3);
+    h.add(1);
     return 0;
 }
