@@ -7,9 +7,9 @@
 
 const int Capacity=1024;
 template <typename T>
-class heap {
+class Heap {
 public:
-    heap();
+    Heap();
     bool empty( ) const;
     T top();
     void add(const T& item);
@@ -21,17 +21,17 @@ private:
 };
 
 template<typename T>
-bool heap<T>::empty() const {
+bool Heap<T>::empty() const {
     return mySize == 0;
 }
 
 template<typename T>
-T heap<T>::top() {
-    return myArray[0];
+T Heap<T>::top() {
+    return myArray[1];
 }
 
 template<typename T>
-void heap<T>::add(const T &item) {
+void Heap<T>::add(const T &item) {
     ++mySize;
     myArray[mySize] = item;
     int r = mySize / 2;
@@ -49,17 +49,34 @@ void heap<T>::add(const T &item) {
 }
 
 template<typename T>
-void heap<T>::removeTop() {
-
+void Heap<T>::removeTop() {
+    myArray[1] = myArray[mySize];
+    --mySize;
+    int c = 2;
+    int r = 1;
+    while (c <= mySize) {
+        if (c < mySize && myArray[c] > myArray[c + 1]) {
+            ++c;
+        }
+        if (myArray[r] > myArray[c]) {
+            T tmp = myArray[r];
+            myArray[r] = myArray[c];
+            myArray[c] = tmp;
+            r = c;
+            c *= 2;
+        } else {
+            break;
+        }
+    }
 }
 
 template<typename T>
-void heap<T>::deleteAllValues() {
+void Heap<T>::deleteAllValues() {
     mySize = 0;
 }
 
 template<typename T>
-heap<T>::heap() {
+Heap<T>::Heap() {
     mySize = 0;
     myArray[0] = 0;
 }

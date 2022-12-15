@@ -2,7 +2,8 @@
 #include <vector>
 #include <ctime>
 #include <cstdlib>
-#include <cstring>
+#include "Heap/Heap.h"
+#include "Map/Map.h"
 
 using namespace std;
 #define num 100
@@ -31,17 +32,17 @@ void CountedSort(vector<T> &x);
 template<class T>
 void RadixSort(vector<T> &x);
 
-//template<class T>
-//void BSTSort(vector<T> &x);//二叉查找树排序，选做
+//二叉查找树排序，选做
+template<class T>
+void BSTSort(vector<T> &x);
 
 //快速排序
 template<class T>
 void QuickSort(vector<T> &x, int left, int right);
 
-//template<class T>
-//void HeapSort(vector<T> &x);//堆排序
-//template<class T>
-//void MergeSort(vector<T> &x);//归并排序（做二路归并）-将课本算法改成内排序算法，使用向量存储代替文件
+//堆排序
+template<class T>
+void HeapSort(vector<T> &x);
 
 template<class T>
 void Display(vector<T> &x);
@@ -133,12 +134,6 @@ int main() {
     cout << "基数排序后" << endl;
     Display(a);
     cout << endl << "使用时长：" << double(end - start) << "ms" << endl;
-//    //额外产品：BST排序
-//    ResetData(a, b);
-//    BSTSort(a);
-//    cout << "BST排序后" << endl;
-//    Display(a);
-//
     //快速排序
     ResetData(a, b);
     start = clock();
@@ -147,11 +142,22 @@ int main() {
     cout << "快速排序后" << endl;
     Display(a);
     cout << endl << "使用时长：" << double(end - start) << "ms" << endl;
-//    //堆排序
-//    //ResetData(a,b);
-//    //HeapSort(a);
-//    //cout<<"堆排序后"<<endl;
-//    //Display(a);
+    //堆排序
+    ResetData(a, b);
+    start = clock();
+    HeapSort(a);
+    end = clock();
+    cout << "堆排序后" << endl;
+    Display(a);
+    cout << endl << "使用时长：" << double(end - start) << "ms" << endl;
+    //额外产品：BST排序
+    ResetData(a, b);
+    start = clock();
+    BSTSort(a);
+    end = clock();
+    cout << "BST排序后" << endl;
+    Display(a);
+    cout << endl << "使用时长：" << double(end - start) << "ms" << endl;
     return 0;
 }
 
@@ -375,5 +381,33 @@ void QuickSort(vector<T> &x, int left, int right) {
         int pivot = Paritition(x, left, right);
         QuickSort(x, left, pivot - 1);
         QuickSort(x, pivot + 1, right);
+    }
+}
+
+template<class T>
+void HeapSort(vector<T> &x) {
+    Heap<T> heap;
+    for (auto item: x) {
+        heap.add(item);
+    }
+    x.clear();
+    while (!heap.empty()) {
+        x.push_back(heap.top());
+        heap.removeTop();
+    }
+}
+
+template<class T>
+void BSTSort(vector<T> &x) {
+    Map<T, int> map;
+    for (auto item: x) {
+        map.insert(Pair<T, int>(item, 1));
+    }
+    x.clear();
+    for (auto iter = map.begin(); iter != map.end(); ++iter) {
+        if (!iter.getPtr()) {
+            break;
+        }
+        x.push_back(iter->getFirst());
     }
 }
