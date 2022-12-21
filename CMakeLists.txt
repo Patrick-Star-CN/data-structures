@@ -4,5 +4,6 @@ project(data_structures)
 set(CMAKE_CXX_STANDARD 14)
 
 add_executable(data_structures
-        SortMain.cpp
-        LinkList/LinkList.h Heap/Heap.h)
+        main.cpp
+        Deque/Deque.h
+        Stack/Stack.h)
