@@ -91,16 +91,11 @@ vector<int> Digraph<DataType>::shortestPath(int start, int destination) {
         vertexQueue.pop();
         for (auto iter = myAdjacencyLists[vertex].adjacencyList.begin();
              iter != myAdjacencyLists[vertex].adjacencyList.end(); ++iter) {
-            if (!flag[iter->first]) {
-                if (predLabel[iter->first] < 0) {
-                    distLabel[iter->first] = distance + iter->second;
-                    predLabel[iter->first] = vertex;
-                    vertexQueue.push(pair<int, int>(distance + iter->second, iter->first));
-                } else if (distLabel[iter->first] > distance + iter->second) {
-                    predLabel[iter->first] = vertex;
-                    distLabel[iter->first] = distance + iter->second;
-                    vertexQueue.push(pair<int, int>(distance + iter->second, iter->first));
-                }
+            if (!flag[iter->first] &&
+                (predLabel[iter->first] < 0 || distLabel[iter->first] > distance + iter->second)) {
+                distLabel[iter->first] = distance + iter->second;
+                predLabel[iter->first] = vertex;
+                vertexQueue.push(pair<int, int>(distance + iter->second, iter->first));
             }
         }
     }
