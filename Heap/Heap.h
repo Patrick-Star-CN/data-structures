@@ -10,7 +10,7 @@ template <typename T>
 class Heap {
 public:
     Heap();
-    bool empty( ) const;
+    bool empty() const;
     T top();
     void add(const T& item);
     void removeTop();

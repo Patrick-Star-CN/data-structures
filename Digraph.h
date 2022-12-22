@@ -3,7 +3,6 @@
 #include <queue>
 #include <iostream>
 #include <iomanip>
-#include "Heap/Heap.h"
 
 using namespace std;
 
@@ -37,7 +36,6 @@ template<typename DataType>
 void Digraph<DataType>::read(istream &in) {
     Digraph<DataType>::VertesInfo vi;
     int n, vertex, dis, m;
-    myAdjacencyLists.push_back(vi);
     in >> m;
     while (m--) {
         in >> vi.data;
@@ -55,7 +53,7 @@ void Digraph<DataType>::read(istream &in) {
 template<typename DataType>
 void Digraph<DataType>::display(ostream &out) {
     out << "Adjacency-List Representation: \n";
-    for (int i = 1; i < myAdjacencyLists.size(); ++i) {
+    for (int i = 0; i < myAdjacencyLists.size(); ++i) {
         if (myAdjacencyLists[i].adjacencyList.empty()) {
             out << i << ": " << myAdjacencyLists[i].data << endl;
             continue;
@@ -64,9 +62,9 @@ void Digraph<DataType>::display(ostream &out) {
         for (auto iter = myAdjacencyLists[i].adjacencyList.begin();
              iter != myAdjacencyLists[i].adjacencyList.end(); ++iter) {
             if (iter == myAdjacencyLists[i].adjacencyList.begin()) {
-                out << iter->first;
+                out << myAdjacencyLists[iter->first].data;
             } else {
-                out << "     " << iter->first;
+                out << "     " << myAdjacencyLists[iter->first].data;
             }
             out << endl;
         }
@@ -76,63 +74,46 @@ void Digraph<DataType>::display(ostream &out) {
 template<typename DataType>
 vector<int> Digraph<DataType>::shortestPath(int start, int destination) {
     int n = myAdjacencyLists.size();
-    vector<int> distLabel(n, -1), predLabel(n);
+    vector<int> distLabel(n, -1), predLabel(n, -1);
+    vector<bool> flag(n, false);
     distLabel[start] = 0;
-    int distance = 0, vertex;
-    Heap<int> vertexQueue;
-    vertexQueue.add(start);
-    while (distLabel[destination] < 0 && !vertexQueue.empty()) {
-        vertex = vertexQueue.top();
-        vertexQueue.removeTop();
-        if (distLabel[vertex] > distance) {
-            distance++;
+    int distance, vertex;
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<> > vertexQueue;
+    vertexQueue.push(pair<int, int>(0, start));
+    while (!flag[destination] && !vertexQueue.empty()) {
+        if (flag[vertexQueue.top().second]) {
+            vertexQueue.pop();
+            continue;
         }
+        vertex = vertexQueue.top().second;
+        distance = vertexQueue.top().first;
+        flag[vertex] = true;
+        vertexQueue.pop();
         for (auto iter = myAdjacencyLists[vertex].adjacencyList.begin();
              iter != myAdjacencyLists[vertex].adjacencyList.end(); ++iter) {
-            if (distLabel[iter->first] < 0) {
-                distLabel[iter->first] = distance + iter->second;
-                predLabel[iter->first] = vertex;
-                vertexQueue.add(iter->first);
+            if (!flag[iter->first]) {
+                if (predLabel[iter->first] < 0) {
+                    distLabel[iter->first] = distance + iter->second;
+                    predLabel[iter->first] = vertex;
+                    vertexQueue.push(pair<int, int>(distance + iter->second, iter->first));
+                } else if (distLabel[iter->first] > distance + iter->second) {
+                    predLabel[iter->first] = vertex;
+                    distLabel[iter->first] = distance + iter->second;
+                    vertexQueue.push(pair<int, int>(distance + iter->second, iter->first));
+                }
             }
         }
     }
-    distance++;
-    vector<int> path(distance + 1);
+    vector<int> path;
     if (distLabel[destination] < 0) {
         cout << "Destination not reachable from start vertex\n";
     } else {
-        path[distance] = destination;
-        for (int k = distance - 1; k >= 0; --k) {
-            path[k] = predLabel[path[k + 1]];
+        path.push_back(destination);
+        int d = destination;
+        while (predLabel[d] != -1) {
+            path.push_back(predLabel[d]);
+            d = predLabel[d];
         }
     }
     return path;
-}
-
-int main() {
-    Digraph<int> d;
-    d.read(cin);
-    cout << "The Digraph's ";
-    d.display(cout);
-    cout << endl;
-
-    int start, destination;
-    char response;
-    do {
-        cout << "Start: ";
-        cin >> start;
-        cout << "Destination: ";
-        cin >>destination;
-        vector<int> path = d.shortestPath(start, destination);
-        cout << "Shortest path is:\n";
-        for (int k = 0; k < path.size() - 1; ++k) {
-            cout << setw(3) << path[k] << " " << d.data(path[k]) << endl;
-            cout << "    |\n"
-                 << "    v\n";
-        }
-        cout << setw(3) << destination << " " << d.data(destination) << endl;
-        cout << "\nMore (Y or N)?";
-        cin >> response;
-    } while (response == 'y' || response == 'Y');
-    return 0;
 }
