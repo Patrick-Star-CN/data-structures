@@ -4,5 +4,4 @@ project(data_structures)
 set(CMAKE_CXX_STANDARD 14)
 
 add_executable(data_structures
-        T2_2.cpp
-        Digraph.h )
+        main.cpp)
